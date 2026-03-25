@@ -284,24 +284,47 @@
   .rest-day-tip.show { display: block; }
   .rest-day-tip strong { color: var(--accent3); }
 
-  /* ── START BTN ── */
+  /* ── START BAR (sticky bottom) ── */
+  .start-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 150;
+    padding: 12px 24px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    background: linear-gradient(transparent, rgba(10,10,10,0.95) 30%);
+    display: flex;
+    justify-content: center;
+    transform: translateY(100%);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  .start-bar.show {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: all;
+  }
+
   .start-btn {
-    width: 100%;
     background: var(--accent);
     color: #000;
     border: none;
-    border-radius: 10px;
-    padding: 18px;
+    border-radius: 40px;
+    padding: 14px 40px;
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
+    font-size: 18px;
     letter-spacing: 4px;
     cursor: pointer;
     transition: all 0.2s;
-    margin-top: 8px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 4px 24px rgba(232,255,58,0.25);
   }
 
-  .start-btn:hover { background: #fff; transform: translateY(-1px); }
-  .start-btn:disabled { background: var(--muted); color: var(--bg); cursor: not-allowed; transform: none; }
+  .start-btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 6px 32px rgba(232,255,58,0.35); }
 
   /* ── TIMER VIEW ── */
   .timer-layout {
@@ -564,6 +587,7 @@
   /* ── FINISHER ── */
   .finisher-section {
     margin-top: 20px;
+    margin-bottom: 80px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 16px;
@@ -1596,8 +1620,6 @@
   </div>
   <div class="mode-desc" id="modeDesc">Circuit: cycle through all 6 movements each round, repeat for X rounds.</div>
 
-  <button class="start-btn" id="startBtn" onclick="goToTimer()" disabled>SELECT A WOD TO BEGIN</button>
-
   <div class="finisher-section">
     <div class="finisher-title">BURN-IT-DOWN FINISHERS</div>
     <div class="finisher-sub">3-minute burners — add to a WOD or run standalone</div>
@@ -1824,6 +1846,11 @@
       <button class="finisher-ctrl-btn primary" id="finisherPlayBtn" onclick="toggleFinisherTimer()">▶ START</button>
     </div>
   </div>
+</div>
+
+<!-- Sticky Start Bar -->
+<div class="start-bar" id="startBar">
+  <button class="start-btn" id="startBtn" onclick="goToTimer()">SELECT A WOD TO BEGIN</button>
 </div>
 
 <!-- Custom WOD Builder Overlay -->
@@ -2399,21 +2426,14 @@ function selectSession(id) {
   if (card) card.classList.add('selected');
 
   const btn = document.getElementById('startBtn');
-  btn.disabled = false;
+  const bar = document.getElementById('startBar');
+  bar.classList.add('show');
 
-  if (session.type === 'mobility') {
-    btn.textContent = `🧘 BEGIN ${session.name}`;
-    btn.style.background = session.color;
-    btn.style.color = '#000';
-  } else if (session.type === 'deload') {
-    btn.textContent = `🔄 START ${session.name}`;
-    btn.style.background = session.color;
-    btn.style.color = '#000';
-  } else {
-    btn.textContent = `▶ START ${session.name}`;
-    btn.style.background = session.color;
-    btn.style.color = '#000';
-  }
+  const prefix = session.type === 'mobility' ? '🧘 BEGIN' : session.type === 'deload' ? '🔄 START' : '▶ START';
+  btn.textContent = `${prefix} ${session.name}`;
+  btn.style.background = session.color;
+  btn.style.color = '#000';
+  btn.style.boxShadow = `0 4px 24px ${session.color}40`;
 }
 
 function adjTimerInline(key, delta) {
@@ -2447,6 +2467,7 @@ function updateInlineTimerUI() {
 
 function goToTimer() {
   if (!selectedWOD) return;
+  document.getElementById('startBar').classList.remove('show');
   resetTimerState();
   renderMovementList();
   renderRoundDots();
@@ -3121,6 +3142,14 @@ function showView(name) {
 
   const tabs = { select: 0, timer: 1, log: 2, settings: 3 };
   document.querySelectorAll('.nav-tab')[tabs[name]]?.classList.add('active');
+
+  // Only show start bar on the select view when a WOD is selected
+  const bar = document.getElementById('startBar');
+  if (name === 'select' && selectedWOD) {
+    bar.classList.add('show');
+  } else {
+    bar.classList.remove('show');
+  }
 }
 
 function quickStart(id, e) {
