@@ -2,7 +2,7 @@
 
 A personal workout app built around a 5-WOD recomposition program targeting hypertrophy, fat loss, and posterior chain development. Designed to be used alongside GLP-1 medication with a specific focus on thighs, glutes, and midsection.
 
-Live at: **https://[your-username].github.io/recomp-wod**
+Live at: **https://krisekenes.github.io/recomp-wod**
 
 ---
 
@@ -58,7 +58,7 @@ Pushes to `main` automatically deploy to GitHub Pages via `.github/workflows/dep
 
 To deploy manually:
 ```bash
-git clone https://github.com/[your-username]/recomp-wod
+git clone https://github.com/krisekenes/recomp-wod
 cd recomp-wod
 # make changes to index.html
 git add . && git commit -m "update" && git push
