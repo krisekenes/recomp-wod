@@ -1,0 +1,2826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RECOMP — WOD Training System</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --border: #222222;
+    --accent: #e8ff3a;
+    --accent2: #ff5a3a;
+    --accent3: #3adfff;
+    --text: #f0f0f0;
+    --muted: #555;
+    --muted2: #888;
+    --wod1: #e8ff3a;
+    --wod2: #3adfff;
+    --wod3: #ff9f3a;
+    --wod4: #ff5a3a;
+    --wod5: #b03aff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.5;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 28px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 4px;
+    color: var(--accent);
+  }
+
+  .logo span { color: var(--muted2); font-size: 12px; font-family: 'DM Mono', monospace; display: block; letter-spacing: 3px; margin-top: -6px; }
+
+  .header-right { display: flex; gap: 12px; align-items: center; }
+
+  .streak-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ── NAV TABS ── */
+  .nav-tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 28px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+
+  .nav-tab {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 14px 20px;
+    cursor: pointer;
+    color: var(--muted2);
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── VIEWS ── */
+  .view { display: none; padding: 28px; }
+  .view.active { display: block; }
+
+  /* ── WOD SELECTOR ── */
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: var(--muted2);
+    margin-bottom: 20px;
+  }
+
+  .wod-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .wod-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .wod-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--card-color, var(--accent));
+  }
+
+  .wod-card:hover {
+    border-color: var(--card-color, var(--accent));
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .wod-card.selected {
+    border-color: var(--card-color, var(--accent));
+    background: var(--surface2);
+  }
+
+  .wod-card.selected::after {
+    content: '✓ SELECTED';
+    position: absolute;
+    top: 14px; right: 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--card-color, var(--accent));
+  }
+
+  .wod-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: var(--card-color, var(--accent));
+    opacity: 0.15;
+    position: absolute;
+    right: 16px;
+    top: 8px;
+    line-height: 1;
+  }
+
+  .wod-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--card-color, var(--accent));
+    margin-bottom: 8px;
+  }
+
+  .wod-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+
+  .wod-focus {
+    font-size: 12px;
+    color: var(--muted2);
+    margin-bottom: 16px;
+  }
+
+  .wod-movements {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .wod-movement-item {
+    font-size: 11px;
+    color: var(--muted2);
+    font-family: 'DM Mono', monospace;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .wod-movement-item::before {
+    content: '';
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--card-color, var(--accent));
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+
+  /* ── SCHEDULE GRID ── */
+  .schedule-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+
+  .schedule-day {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 8px;
+    text-align: center;
+  }
+
+  .schedule-day .day-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted2);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .schedule-day .day-wod {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+
+  .schedule-day.rest .day-wod { color: var(--muted); }
+  .schedule-day.today { border-color: var(--accent); }
+  .schedule-day.today .day-name { color: var(--accent); }
+
+  /* ── START BTN ── */
+  .start-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    padding: 18px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+
+  .start-btn:hover { background: #fff; transform: translateY(-1px); }
+  .start-btn:disabled { background: var(--muted); color: var(--bg); cursor: not-allowed; transform: none; }
+
+  /* ── TIMER VIEW ── */
+  .timer-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 800px) {
+    .timer-layout { grid-template-columns: 1fr; }
+  }
+
+  .timer-main { display: flex; flex-direction: column; gap: 20px; }
+
+  /* ── BIG TIMER ── */
+  .timer-circle-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 24px 28px;
+    position: relative;
+  }
+
+  .phase-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    transition: color 0.3s;
+  }
+
+  .phase-label.work { color: var(--accent); }
+  .phase-label.rest { color: var(--accent3); }
+  .phase-label.round-rest { color: var(--accent2); }
+
+  .timer-ring {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    margin-bottom: 20px;
+  }
+
+  .timer-ring svg {
+    position: absolute;
+    top: 0; left: 0;
+    transform: rotate(-90deg);
+  }
+
+  .ring-bg { fill: none; stroke: var(--border); stroke-width: 6; }
+  .ring-progress { fill: none; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.3s; }
+
+  .timer-display {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  .timer-seconds {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 80px;
+    line-height: 1;
+    letter-spacing: -2px;
+  }
+
+  .timer-round {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted2);
+    letter-spacing: 2px;
+    margin-top: 8px;
+  }
+
+  .timer-controls {
+    display: flex;
+    gap: 12px;
+  }
+
+  .ctrl-btn {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .ctrl-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .ctrl-btn.primary:hover { background: #fff; border-color: #fff; color: #000; }
+  .ctrl-btn.danger { border-color: var(--accent2); color: var(--accent2); }
+
+  /* ── CURRENT EXERCISE ── */
+  .current-ex {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+  }
+
+  .current-ex-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted2);
+    margin-bottom: 10px;
+  }
+
+  .current-ex-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+    line-height: 1.1;
+  }
+
+  .current-ex-cue {
+    font-size: 13px;
+    color: var(--muted2);
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  .rep-tracker {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .rep-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted2);
+    letter-spacing: 1px;
+  }
+
+  .rep-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .rep-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .rep-count {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: var(--accent);
+    min-width: 40px;
+    text-align: center;
+  }
+
+  .beat-the-book {
+    margin-top: 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    display: none;
+  }
+
+  .beat-the-book.show { display: block; }
+
+  /* ── MOVEMENT LIST SIDEBAR ── */
+  .movement-list {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    height: fit-content;
+    position: sticky;
+    top: 80px;
+  }
+
+  .movement-list-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted2);
+    margin-bottom: 16px;
+  }
+
+  .movement-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    transition: all 0.2s;
+    cursor: default;
+  }
+
+  .movement-item.active {
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+  }
+
+  .movement-item.done {
+    opacity: 0.35;
+  }
+
+  .mv-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    color: var(--muted);
+    width: 20px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+
+  .movement-item.active .mv-num { color: var(--accent); }
+
+  .mv-info { flex: 1; min-width: 0; }
+
+  .mv-name {
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+  }
+
+  .mv-equip {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted2);
+    letter-spacing: 1px;
+  }
+
+  .mv-check {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+  }
+
+  .movement-item.done .mv-check {
+    background: var(--muted);
+    border-color: var(--muted);
+    color: var(--bg);
+  }
+
+  .movement-item.active .mv-check {
+    border-color: var(--accent);
+    animation: pulse-ring 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse-ring {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(232,255,58,0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(232,255,58,0); }
+  }
+
+  .round-dots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .round-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    border: 1px solid var(--muted);
+    transition: all 0.3s;
+  }
+
+  .round-dot.done { background: var(--accent); border-color: var(--accent); }
+  .round-dot.current { background: var(--accent); border-color: var(--accent); animation: pulse-ring 1s ease-in-out infinite; }
+
+  /* ── FINISHER ── */
+  .finisher-section {
+    margin-top: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+  }
+
+  .finisher-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 3px;
+    color: var(--accent2);
+    margin-bottom: 4px;
+  }
+
+  .finisher-sub {
+    font-size: 12px;
+    color: var(--muted2);
+    margin-bottom: 16px;
+  }
+
+  .finisher-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+  }
+
+  .finisher-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .finisher-card:hover { border-color: var(--accent2); transform: translateY(-1px); }
+  .finisher-card.selected { border-color: var(--accent2); background: rgba(255,90,58,0.08); }
+  .finisher-card.selected::after { content: '✓ ADDED'; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--accent2); display: block; margin-top: 10px; }
+
+  .finisher-card-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: var(--accent2);
+    margin-bottom: 4px;
+  }
+
+  .finisher-card-focus {
+    font-size: 11px;
+    color: var(--muted2);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 12px;
+  }
+
+  .finisher-segments {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .finisher-seg {
+    font-size: 11px;
+    color: var(--muted2);
+    display: flex;
+    gap: 8px;
+  }
+
+  .finisher-seg span:first-child {
+    font-family: 'DM Mono', monospace;
+    color: var(--accent2);
+    flex-shrink: 0;
+    width: 55px;
+  }
+
+  /* ── QUICK START on WOD card ── */
+  .wod-card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .wod-quick-start {
+    flex: 1;
+    background: var(--card-color, var(--accent));
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    padding: 9px 14px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+  }
+
+  .wod-card:hover .wod-quick-start,
+  .wod-card.selected .wod-quick-start {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+  }
+
+  /* always visible on touch devices */
+  @media (hover: none) {
+    .wod-quick-start { opacity: 1; transform: translateY(0); pointer-events: all; }
+  }
+
+  /* ── SHARE BUTTON on log entries ── */
+  .log-share-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted2);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .log-share-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .log-share-btn.copied { border-color: var(--accent); color: var(--accent); }
+
+  .log-entry {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .log-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted2);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 2px;
+  }
+
+  .log-color-bar {
+    width: 4px;
+    height: 40px;
+    border-radius: 4px;
+  }
+
+  .log-wod-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    margin-bottom: 2px;
+  }
+
+  .log-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted2);
+    letter-spacing: 1px;
+  }
+
+  .log-stats {
+    text-align: right;
+  }
+
+  .log-stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    color: var(--accent);
+  }
+
+  .log-stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted2);
+    letter-spacing: 1px;
+  }
+
+  .stats-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .stat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--accent);
+  }
+
+  .stat-lbl {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted2);
+    letter-spacing: 2px;
+    margin-top: 2px;
+  }
+
+  /* ── SETTINGS ── */
+  .settings-grid { display: grid; gap: 16px; max-width: 600px; }
+
+  .setting-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .setting-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+  }
+
+  .setting-desc {
+    font-size: 11px;
+    color: var(--muted2);
+  }
+
+  .setting-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .setting-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--accent);
+    min-width: 36px;
+    text-align: center;
+  }
+
+  .setting-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 30px; height: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .setting-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── COMPLETE OVERLAY ── */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    backdrop-filter: blur(12px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s;
+  }
+
+  .overlay.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  #celebrationCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 199;
+  }
+
+  .complete-card {
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 20px;
+    padding: 44px 36px 36px;
+    text-align: center;
+    max-width: 420px;
+    width: 92%;
+    box-shadow: 0 0 100px rgba(232,255,58,0.18), 0 0 40px rgba(232,255,58,0.08);
+    position: relative;
+    transform: scale(0.85) translateY(24px);
+    opacity: 0;
+    transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1), opacity 0.35s ease;
+  }
+
+  .overlay.show .complete-card {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+
+  .complete-icon {
+    font-size: 64px;
+    margin-bottom: 14px;
+    display: block;
+    animation: none;
+  }
+
+  .overlay.show .complete-icon {
+    animation: iconPop 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;
+  }
+
+  @keyframes iconPop {
+    0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  .complete-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 6px;
+    color: var(--accent);
+    margin-bottom: 2px;
+    line-height: 1;
+  }
+
+  .complete-subtitle {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted2);
+    margin-bottom: 6px;
+  }
+
+  .complete-wod {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted2);
+    letter-spacing: 2px;
+    margin-bottom: 22px;
+  }
+
+  .complete-motivator {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 22px;
+    padding: 14px 16px;
+    background: var(--surface2);
+    border-radius: 10px;
+    border-left: 3px solid var(--accent);
+    text-align: left;
+    font-style: italic;
+  }
+
+  .complete-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .complete-stat {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 12px 8px;
+  }
+
+  .complete-stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--accent);
+  }
+
+  .complete-stat-lbl {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--muted2);
+    letter-spacing: 1px;
+  }
+
+  .complete-btns { display: flex; gap: 10px; }
+
+  .complete-btn {
+    flex: 1;
+    padding: 14px;
+    border-radius: 8px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  .complete-btn.primary { background: var(--accent); color: #000; }
+  .complete-btn.primary:hover { background: #fff; transform: translateY(-1px); }
+  .complete-btn.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+
+  .timer-adj {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .timer-adj-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 10px;
+  }
+
+  .timer-adj-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--muted2);
+    width: 55px;
+  }
+
+  .timer-adj-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    color: var(--accent);
+    min-width: 32px;
+    text-align: center;
+  }
+
+  .timer-adj-btn {
+    background: none;
+    border: none;
+    color: var(--muted2);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 2px;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+
+  .timer-adj-btn:hover { color: var(--accent); }
+
+  .finisher-active-banner {
+    background: rgba(255,90,58,0.1);
+    border: 1px solid var(--accent2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    letter-spacing: 1px;
+    display: none;
+  }
+
+  .finisher-active-banner.show { display: block; }
+
+  /* ── CATEGORY FILTER — pill tags ── */
+  .cat-filter {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .cat-btn {
+    padding: 5px 13px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted2);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .cat-btn:hover { color: var(--text); border-color: var(--muted2); }
+  .cat-btn.active { color: #000; background: var(--accent); border-color: var(--accent); }
+  .cat-btn[data-cat="mobility"].active { background: #ff9f3a; border-color: #ff9f3a; }
+  .cat-btn[data-cat="deload"].active { background: #888; border-color: #888; }
+  .cat-btn[data-cat="extra"].active { background: #3affa0; border-color: #3affa0; }
+
+  /* ── EXERCISE IMAGE in timer ── */
+  /* TODO: Add exercise image panel styles here when implementing GIF follow-up.
+     See TODO comment in timer HTML and EXERCISE_IMAGES map in JS section. */
+
+  /* ── MOBILITY CARD ── */
+  .mobility-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+    grid-column: span 1;
+  }
+
+  .mobility-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--card-color, #ff9f3a);
+  }
+
+  .mobility-card:hover {
+    border-color: var(--card-color, #ff9f3a);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .mobility-card.selected { border-color: var(--card-color, #ff9f3a); background: var(--surface2); }
+  .mobility-card.selected::after {
+    content: '✓ SELECTED';
+    position: absolute;
+    top: 14px; right: 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--card-color, #ff9f3a);
+  }
+
+  .mob-duration {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted2);
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ── FINISHER TIMER OVERLAY ── */
+  .finisher-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.94);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 201;
+    backdrop-filter: blur(12px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .finisher-overlay.show { opacity: 1; pointer-events: all; }
+
+  .finisher-timer-card {
+    background: var(--surface);
+    border: 1px solid var(--accent2);
+    border-radius: 20px;
+    padding: 36px 32px;
+    text-align: center;
+    max-width: 480px;
+    width: 94%;
+    box-shadow: 0 0 60px rgba(255,90,58,0.15);
+  }
+
+  .finisher-timer-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--accent2);
+    margin-bottom: 6px;
+  }
+
+  .finisher-timer-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 3px;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  .finisher-big-time {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 96px;
+    line-height: 1;
+    letter-spacing: -4px;
+    color: var(--accent2);
+    margin-bottom: 4px;
+    transition: color 0.3s;
+  }
+
+  .finisher-big-time.last { color: var(--accent); }
+
+  .finisher-seg-display {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin: 16px 0;
+    text-align: left;
+  }
+
+  .finisher-seg-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--accent2);
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+
+  .finisher-seg-ex {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .finisher-seg-next {
+    font-size: 12px;
+    color: var(--muted2);
+    margin-top: 10px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  .finisher-btns { display: flex; gap: 10px; margin-top: 20px; }
+
+  .finisher-ctrl-btn {
+    flex: 1;
+    padding: 13px;
+    border-radius: 8px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  .finisher-ctrl-btn.primary { background: var(--accent2); color: #fff; }
+  .finisher-ctrl-btn.primary:hover { background: #fff; color: var(--accent2); }
+  .finisher-ctrl-btn.secondary { background: var(--surface2); color: var(--muted2); border: 1px solid var(--border); }
+
+  /* ── MODE TOGGLE ── */
+  .mode-toggle {
+    display: flex;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    width: fit-content;
+  }
+
+  .mode-btn {
+    padding: 12px 22px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: var(--muted2);
+    transition: all 0.2s;
+  }
+
+  .mode-btn.active { background: var(--surface2); color: var(--accent); }
+
+  .mode-desc {
+    font-size: 12px;
+    color: var(--muted2);
+    margin-bottom: 20px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 1px;
+    line-height: 1.5;
+  }
+
+  .timer-adj-group.locked .timer-adj-btn { opacity: 0.25; cursor: not-allowed; pointer-events: none; }
+  .timer-adj-group.locked .timer-adj-val { color: var(--muted); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .view.active > * {
+    animation: fadeUp 0.3s ease both;
+  }
+
+  .timer-seconds.flash {
+    animation: flash 0.3s ease;
+  }
+
+  @keyframes flash {
+    0%, 100% { color: var(--text); }
+    50% { color: var(--accent); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    header { padding: 16px; }
+    .view { padding: 16px; }
+    .stats-strip { grid-template-columns: repeat(2, 1fr); }
+    .schedule-row { grid-template-columns: repeat(4, 1fr); }
+    .wod-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">RECOMP<span>TRAINING SYSTEM</span></div>
+  </div>
+  <div class="header-right">
+    <div class="streak-badge">🔥 <span id="streakNum">0</span> DAY STREAK</div>
+  </div>
+</header>
+
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="showView('select')">WORKOUTS</button>
+  <button class="nav-tab" onclick="showView('timer')" id="timerTab">TIMER</button>
+  <button class="nav-tab" onclick="showView('log')">LOG</button>
+  <button class="nav-tab" onclick="showView('settings')">SETTINGS</button>
+</div>
+
+<!-- ════════════════════════════════════
+     VIEW: SELECT WOD
+     ════════════════════════════════════ -->
+<div class="view active" id="view-select">
+
+  <p class="section-title">WEEKLY SCHEDULE</p>
+  <div class="schedule-row" id="scheduleRow"></div>
+
+  <p class="section-title">SELECT YOUR SESSION</p>
+  <div class="cat-filter">
+    <button class="cat-btn active" data-cat="all" onclick="filterCat('all',this)">ALL</button>
+    <button class="cat-btn" data-cat="wod" onclick="filterCat('wod',this)">WODs 1–5</button>
+    <button class="cat-btn" data-cat="extra" onclick="filterCat('extra',this)">EXTRA</button>
+    <button class="cat-btn" data-cat="mobility" onclick="filterCat('mobility',this)">MOBILITY</button>
+    <button class="cat-btn" data-cat="deload" onclick="filterCat('deload',this)">DELOAD</button>
+  </div>
+  <div class="wod-grid" id="wodGrid"></div>
+
+  <p class="section-title">WORKOUT MODE</p>
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeCircuit" onclick="setMode('circuit')">⟳ CIRCUIT</button>
+    <button class="mode-btn" id="modeStation" onclick="setMode('station')">● STATION</button>
+  </div>
+  <div class="mode-desc" id="modeDesc">Circuit: cycle through all 6 movements each round, repeat for X rounds.</div>
+
+  <button class="start-btn" id="startBtn" onclick="goToTimer()" disabled>SELECT A WOD TO BEGIN</button>
+
+  <div class="finisher-section">
+    <div class="finisher-title">BURN-IT-DOWN FINISHERS</div>
+    <div class="finisher-sub">3-minute post-WOD intensifiers — choose one to tack on at the end</div>
+    <div class="finisher-cards" id="finisherCards"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     VIEW: TIMER
+     ════════════════════════════════════ -->
+<div class="view" id="view-timer">
+  <div class="timer-layout">
+
+    <div class="timer-main">
+      <!-- Big Timer -->
+      <div class="timer-circle-wrap">
+        <div class="phase-label work" id="phaseLabel">WORK</div>
+
+        <div class="timer-ring">
+          <svg width="220" height="220" viewBox="0 0 220 220">
+            <circle class="ring-bg" cx="110" cy="110" r="96"/>
+            <circle class="ring-progress" id="ringProgress" cx="110" cy="110" r="96"
+              stroke-dasharray="603.19" stroke-dashoffset="0" stroke="#e8ff3a"/>
+          </svg>
+          <div class="timer-display">
+            <div class="timer-seconds" id="timerDisplay">45</div>
+            <div class="timer-round" id="roundLabel">ROUND 1 / 4</div>
+          </div>
+        </div>
+
+        <div class="timer-controls">
+          <button class="ctrl-btn primary" id="playPauseBtn" onclick="toggleTimer()">▶ START</button>
+          <button class="ctrl-btn" onclick="skipPhase()">SKIP ⏭</button>
+          <button class="ctrl-btn danger" onclick="stopTimer()">✕ END</button>
+        </div>
+
+        <!-- Inline timer adjusters -->
+        <div class="timer-adj">
+          <div class="timer-adj-group">
+            <span class="timer-adj-label">WORK</span>
+            <button class="timer-adj-btn" onclick="adjTimerInline('work',-5)">−</button>
+            <div class="timer-adj-val" id="inlineWork">60s</div>
+            <button class="timer-adj-btn" onclick="adjTimerInline('work',5)">+</button>
+          </div>
+          <div class="timer-adj-group">
+            <span class="timer-adj-label">REST</span>
+            <button class="timer-adj-btn" onclick="adjTimerInline('rest',-5)">−</button>
+            <div class="timer-adj-val" id="inlineRest">15s</div>
+            <button class="timer-adj-btn" onclick="adjTimerInline('rest',5)">+</button>
+          </div>
+          <div class="timer-adj-group" id="inlineRoundsGroup">
+            <span class="timer-adj-label">ROUNDS</span>
+            <button class="timer-adj-btn" onclick="adjTimerInline('rounds',-1)">−</button>
+            <div class="timer-adj-val" id="inlineRounds">4</div>
+            <button class="timer-adj-btn" onclick="adjTimerInline('rounds',1)">+</button>
+          </div>
+        </div>
+
+        <div class="finisher-active-banner" id="finisherBanner"></div>
+      </div>
+
+      <!-- Current Exercise -->
+      <div class="current-ex">
+        <div class="current-ex-label">CURRENT MOVEMENT</div>
+        <div class="current-ex-name" id="exName">—</div>
+
+        <!-- TODO: Exercise GIF/image panel — follow-up task
+             Plan: two-frame flip from yuhonas/free-exercise-db (public domain)
+             Base URL: https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/{folder}/0.jpg
+             Each exercise has 0.jpg + 1.jpg — alternate on ~900ms interval to simulate animation.
+             EXERCISE_IMAGES map already drafted in CONTEXT.md.
+             Skipped today to ship a stable build. -->
+
+        <div class="current-ex-cue" id="exCue">Select a WOD and hit start.</div>
+
+        <div class="rep-tracker">
+          <span class="rep-label">ROUND REPS:</span>
+          <button class="rep-btn" onclick="adjustReps(-1)">−</button>
+          <div class="rep-count" id="repCount">0</div>
+          <button class="rep-btn" onclick="adjustReps(1)">+</button>
+        </div>
+
+        <div class="beat-the-book" id="beatBook"></div>
+      </div>
+    </div>
+
+    <!-- Sidebar: Movement List -->
+    <div class="movement-list">
+      <div class="movement-list-title">MOVEMENTS</div>
+      <div id="movementListItems"></div>
+
+      <div class="round-dots" id="roundDots"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     VIEW: LOG
+     ════════════════════════════════════ -->
+<div class="view" id="view-log">
+  <div class="stats-strip">
+    <div class="stat-box"><div class="stat-val" id="statTotal">0</div><div class="stat-lbl">SESSIONS</div></div>
+    <div class="stat-box"><div class="stat-val" id="statTime">0m</div><div class="stat-lbl">TOTAL TIME</div></div>
+    <div class="stat-box"><div class="stat-val" id="statStreak">0</div><div class="stat-lbl">STREAK</div></div>
+    <div class="stat-box"><div class="stat-val" id="statFave">—</div><div class="stat-lbl">FAV WOD</div></div>
+  </div>
+  <p class="section-title">SESSION HISTORY</p>
+  <div id="logList"></div>
+</div>
+
+<!-- ════════════════════════════════════
+     VIEW: SETTINGS
+     ════════════════════════════════════ -->
+<div class="view" id="view-settings">
+  <p class="section-title">TIMER SETTINGS</p>
+  <div class="settings-grid">
+    <div class="setting-row">
+      <div><div class="setting-label">WORK INTERVAL</div><div class="setting-desc">Seconds per exercise</div></div>
+      <div class="setting-control">
+        <button class="setting-btn" onclick="adjustSetting('work',-5)">−</button>
+        <div class="setting-val" id="setWork">60</div>
+        <button class="setting-btn" onclick="adjustSetting('work',5)">+</button>
+      </div>
+    </div>
+    <div class="setting-row">
+      <div><div class="setting-label">REST INTERVAL</div><div class="setting-desc">Seconds between exercises</div></div>
+      <div class="setting-control">
+        <button class="setting-btn" onclick="adjustSetting('rest',-5)">−</button>
+        <div class="setting-val" id="setRest">15</div>
+        <button class="setting-btn" onclick="adjustSetting('rest',5)">+</button>
+      </div>
+    </div>
+    <div class="setting-row">
+      <div><div class="setting-label">ROUND REST</div><div class="setting-desc">Seconds between rounds</div></div>
+      <div class="setting-control">
+        <button class="setting-btn" onclick="adjustSetting('roundRest',-10)">−</button>
+        <div class="setting-val" id="setRoundRest">60</div>
+        <button class="setting-btn" onclick="adjustSetting('roundRest',10)">+</button>
+      </div>
+    </div>
+    <div class="setting-row">
+      <div><div class="setting-label">ROUNDS</div><div class="setting-desc">Total rounds per WOD</div></div>
+      <div class="setting-control">
+        <button class="setting-btn" onclick="adjustSetting('rounds',-1)">−</button>
+        <div class="setting-val" id="setRounds">4</div>
+        <button class="setting-btn" onclick="adjustSetting('rounds',1)">+</button>
+      </div>
+    </div>
+    <div class="setting-row">
+      <div><div class="setting-label">SOUND ALERTS</div><div class="setting-desc">Beep on phase changes</div></div>
+      <div class="setting-control">
+        <button class="ctrl-btn" id="soundToggle" onclick="toggleSound()" style="font-size:11px;padding:8px 14px;">🔊 ON</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confetti canvas (behind overlay) -->
+<canvas id="celebrationCanvas" style="display:none"></canvas>
+
+<!-- Complete Overlay -->
+<div class="overlay" id="completeOverlay">
+  <div class="complete-card">
+    <span class="complete-icon" id="completeIcon">🏆</span>
+    <div class="complete-title">CRUSHED IT</div>
+    <div class="complete-subtitle">SESSION COMPLETE</div>
+    <div class="complete-wod" id="completeWodName"></div>
+    <div class="complete-motivator" id="completeMotivator"></div>
+    <div class="complete-stats">
+      <div class="complete-stat">
+        <div class="complete-stat-val" id="completeRounds">—</div>
+        <div class="complete-stat-lbl">ROUNDS</div>
+      </div>
+      <div class="complete-stat">
+        <div class="complete-stat-val" id="completeTime">—</div>
+        <div class="complete-stat-lbl">DURATION</div>
+      </div>
+      <div class="complete-stat">
+        <div class="complete-stat-val" id="completeMoves">—</div>
+        <div class="complete-stat-lbl">MOVEMENTS</div>
+      </div>
+    </div>
+    <div class="complete-btns">
+      <button class="complete-btn secondary" onclick="closeComplete()">CLOSE</button>
+      <button class="complete-btn primary" onclick="saveAndClose()">SAVE SESSION</button>
+    </div>
+  </div>
+</div>
+
+<!-- Finisher Timer Overlay -->
+<div class="finisher-overlay" id="finisherOverlay">
+  <div class="finisher-timer-card">
+    <div class="finisher-timer-label">BURN-IT-DOWN FINISHER</div>
+    <div class="finisher-timer-name" id="finisherTimerName"></div>
+    <div class="finisher-big-time" id="finisherBigTime">3:00</div>
+    <div class="finisher-seg-display">
+      <div class="finisher-seg-time" id="finisherSegTime"></div>
+      <div class="finisher-seg-ex" id="finisherSegEx"></div>
+      <div class="finisher-seg-next" id="finisherSegNext"></div>
+    </div>
+    <div class="finisher-btns">
+      <button class="finisher-ctrl-btn secondary" onclick="closeFinisherTimer()">✕ SKIP</button>
+      <button class="finisher-ctrl-btn primary" id="finisherPlayBtn" onclick="toggleFinisherTimer()">▶ START</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════
+// DATA
+// ═══════════════════════════════
+const WODS = [
+  {
+    id: 1,
+    name: '"The Foundation"',
+    tag: 'WOD 01',
+    focus: 'Thighs, Glutes & Explosiveness',
+    color: '#e8ff3a',
+    day: 'MON',
+    movements: [
+      { name: 'Barbell Back Squats', equip: 'BARBELL', cue: '1.5 Rep method: All the way down, halfway up, back down, then stand. Brutal on the quads.' },
+      { name: 'Kettlebell Swings', equip: 'KETTLEBELL', cue: 'Power focus — snap the hips aggressively. Drive from the posterior chain, not the arms.' },
+      { name: 'Dumbbell Reverse Lunges', equip: 'DUMBBELLS', cue: 'Alternate legs. Keep torso upright for quad focus. Step back far enough for 90° knee angle.' },
+      { name: 'Barbell Romanian Deadlifts', equip: 'BARBELL', cue: 'Slow eccentric (3 seconds down). Feel the stretch in hamstrings and glutes before driving up.' },
+      { name: 'Kettlebell Goblet Squats', equip: 'KETTLEBELL', cue: 'Hold at chest level. Pause 1 full second at the bottom — don\'t bounce out.' },
+      { name: 'Jump Squats', equip: 'BODYWEIGHT', cue: 'Max height every rep. Land softly, absorb through hips. This spikes the heart rate for fat burn.' }
+    ]
+  },
+  {
+    id: 2,
+    name: '"The Engine"',
+    tag: 'WOD 02',
+    focus: 'Push, Pull & Midsection Stability',
+    color: '#3adfff',
+    day: 'TUE',
+    movements: [
+      { name: 'Barbell Overhead Press', equip: 'BARBELL', cue: 'Strict — no leg drive. Core tight, ribs down. Press through the ceiling, lower controlled.' },
+      { name: 'Dumbbell Renegade Rows', equip: 'DUMBBELLS', cue: 'Push-up → Row Left → Row Right = 1 rep. Keep hips square. Anti-rotation core challenge.' },
+      { name: 'Kettlebell Clean & Press', equip: 'KETTLEBELL', cue: 'Alternate arms each rep. Catch in the rack position cleanly before pressing overhead.' },
+      { name: 'Barbell Bent-Over Rows', equip: 'BARBELL', cue: 'Underhand supinated grip to engage lats and biceps. Pull to the lower chest. Flat back throughout.' },
+      { name: 'Dumbbell Floor Press', equip: 'DUMBBELLS', cue: 'Chest focus. Pause briefly when elbows touch the floor — eliminates momentum, maximizes tension.' },
+      { name: 'Weighted Russian Twists', equip: 'KETTLEBELL', cue: 'Use a light KB. Touch the floor on each side. Lean back 45° and keep feet elevated.' }
+    ]
+  },
+  {
+    id: 3,
+    name: '"The Hinge"',
+    tag: 'WOD 03',
+    focus: 'Posterior Chain & Deep Core',
+    color: '#ff9f3a',
+    day: 'WED',
+    movements: [
+      { name: 'Barbell Deadlifts', equip: 'BARBELL', cue: 'Standard grip. Reset with a flat back each rep. Don\'t round the lumbar. Brace hard before each pull.' },
+      { name: 'KB Suitcase Carry', equip: 'KETTLEBELL', cue: 'Heavy KB in LEFT hand. Walk perfectly vertical — don\'t let it pull your shoulder. Switch hands next round.' },
+      { name: 'Dumbbell Stiff-Leg Deadlifts', equip: 'DUMBBELLS', cue: 'Slight knee bend. Hinge at the hip, feel the hamstring stretch. Squeeze glutes aggressively at the top.' },
+      { name: 'KB Goblet Lateral Lunges', equip: 'KETTLEBELL', cue: 'Alternate sides. Stay low in the transition — don\'t stand fully between reps. Hit the inner thigh.' },
+      { name: 'Barbell Glute Bridges', equip: 'BARBELL', cue: 'Bar on hips (use a pad). Squeeze glutes hard at the top and hold 1 second. Drive through the heels.' },
+      { name: 'Hollow Body Hold', equip: 'BODYWEIGHT', cue: 'Lower back PRESSED into floor. Arms extended overhead, legs hovering 6 inches. Breathe and hold.' }
+    ]
+  },
+  {
+    id: 4,
+    name: '"The Metabolic Torch"',
+    tag: 'WOD 04',
+    focus: 'Max Caloric Burn & Stamina',
+    color: '#ff5a3a',
+    day: 'FRI',
+    movements: [
+      { name: 'Barbell Thrusters', equip: 'BARBELL', cue: 'Squat to overhead press in one explosive motion. Use the momentum from the squat to drive the press.' },
+      { name: 'Dumbbell Devil\'s Press', equip: 'DUMBBELLS', cue: 'Chest-to-floor burpee, then a double DB snatch in one motion. Full extension overhead. High intensity.' },
+      { name: 'KB American Swings', equip: 'KETTLEBELL', cue: 'Swing the bell all the way overhead — full extension at the top. More shoulder stability than Russian swings.' },
+      { name: 'Barbell Power Cleans', equip: 'BARBELL', cue: 'From floor to the front rack position. Fast hips, fast elbows. Keep the bar close to the body.' },
+      { name: 'DB Weighted Step-ups', equip: 'DUMBBELLS', cue: 'Use a bench or box. Alternate legs. Drive through the heel of the elevated foot. Keep core braced.' },
+      { name: 'Burpees Over the Bar', equip: 'BODYWEIGHT', cue: 'Chest to floor burpee, then jump laterally over your barbell. This is the heart rate spike finisher.' }
+    ]
+  },
+  {
+    id: 5,
+    name: '"The Finisher"',
+    tag: 'WOD 05',
+    focus: 'Hypertrophy & Midsection Volume',
+    color: '#b03aff',
+    day: 'SAT',
+    movements: [
+      { name: 'Barbell Front Squats', equip: 'BARBELL', cue: 'Elbows up, creating a shelf. Engages core significantly more than back squats. Stay upright.' },
+      { name: 'Dumbbell Goblet Lunges', equip: 'DUMBBELLS', cue: 'Forward lunges — focus on pushing off the front heel to drive glute activation. Keep torso tall.' },
+      { name: 'KB Single-Arm Snatch', equip: 'KETTLEBELL', cue: 'Alternate arms every 5 reps. One explosive pull from below the hip to fully overhead. Control the descent.' },
+      { name: 'Barbell Upright Rows', equip: 'BARBELL', cue: 'Pull to chin level. Lead with the elbows. Focus on traps and side delts. Don\'t shrug at the top.' },
+      { name: 'DB Curl to Press', equip: 'DUMBBELLS', cue: 'Bicep curl into an overhead press. Maximize time under tension throughout. Slow and controlled.' },
+      { name: 'Plank to Pike', equip: 'BODYWEIGHT', cue: 'From a plank, walk feet toward hands until your hips pike up, then walk back out. Targets the deep core.' }
+    ]
+  }
+];
+
+const FINISHERS = [
+  {
+    name: '"Midsection Vacuum"',
+    focus: 'CORE & OBLIQUES',
+    segments: [
+      { time: '0:00–1:00', ex: 'KB Suitcase Carry (Left Hand) — perfectly vertical torso' },
+      { time: '1:00–2:00', ex: 'KB Suitcase Carry (Right Hand) — don\'t let it pull the shoulder' },
+      { time: '2:00–3:00', ex: 'Hollow Body Rocks — cradle position, lower back on floor' }
+    ]
+  },
+  {
+    name: '"Thigh & Glute Pump"',
+    focus: 'LOWER BODY',
+    segments: [
+      { time: '0:00–1:00', ex: 'DB Goblet Squat Pulse — stay in the bottom half, 2–3 inch pulses' },
+      { time: '1:00–2:00', ex: 'Alternating BW Reverse Lunges — speed + crisp form' },
+      { time: '2:00–3:00', ex: 'Wall Sit — hold parallel. Harder: hold a light DB on quads' }
+    ]
+  },
+  {
+    name: '"Metabolic Redline"',
+    focus: 'FULL BODY — PLATEAU BREAKER',
+    segments: [
+      { time: '0:00–1:00', ex: 'KB Swings — max reps, aggressive hip snap' },
+      { time: '1:00–2:00', ex: 'Burpees — steady sustainable pace, chest to floor' },
+      { time: '2:00–3:00', ex: 'KB Swings — empty the tank, spike the metabolic afterburn' }
+    ]
+  }
+];
+
+const WODS_EXTRA = [
+  {
+    id: 6,
+    name: '"The Asymmetry"',
+    tag: 'WOD 06',
+    type: 'strength',
+    focus: 'Unilateral Strength & Imbalance Correction',
+    color: '#3affa0',
+    day: 'ALT',
+    movements: [
+      { name: 'Single-Leg Romanian Deadlift', equip: 'DUMBBELL', cue: 'Hold DB in opposite hand to standing leg (contralateral). Hinge until back is parallel, pause, drive through glute to stand. 30s each side.' },
+      { name: 'Bulgarian Split Squats', equip: 'DUMBBELLS + BENCH', cue: 'Rear foot elevated on bench. Front foot far enough forward that knee tracks over toe. Slow down (3s), explosive up. 30s each side.' },
+      { name: 'Single-Arm KB Row', equip: 'KETTLEBELL + BENCH', cue: 'Brace on bench. Pull KB to hip — not armpit. Full stretch at bottom, pause and squeeze at top. 30s each side.' },
+      { name: 'Pistol Squat Progression', equip: 'BODYWEIGHT / BENCH', cue: 'Use bench as target for box pistols if full pistol isn\'t there yet. Sit to the edge, extend one leg, stand on one leg. Build control.' },
+      { name: 'Single-Arm KB Press', equip: 'KETTLEBELL', cue: 'Stand or seated. Press one arm at a time — the anti-rotation demand forces deep core engagement. 30s each side.' },
+      { name: 'Pull-Up Negatives', equip: 'PULL-UP BAR', cue: 'Jump to top position, then lower as slowly as possible — aim for 5–8 seconds down. Full dead hang at bottom. Max quality reps.' }
+    ]
+  },
+  {
+    id: 7,
+    name: '"The Restore"',
+    tag: 'WOD 07',
+    type: 'deload',
+    focus: 'Deload — Active Recovery & Movement Quality',
+    color: '#aaaaaa',
+    day: 'ALT',
+    movements: [
+      { name: 'Barbell Good Mornings', equip: 'BARBELL', cue: 'Light weight — this is movement quality work. Hinge at hip, soft knee, feel the hamstring load. NOT a strength set. Slow and controlled.' },
+      { name: 'DB Farmer\'s Carry', equip: 'DUMBBELLS', cue: 'Moderate weight. Walk with perfect posture — shoulders back, core braced, no lean. Great for grip, traps, and postural muscles.' },
+      { name: 'Dead Hang', equip: 'PULL-UP BAR', cue: 'Full passive hang. Let the shoulders decompress. Breathe slowly. Great for shoulder health and spinal decompression. Hold the full 45–60s.' },
+      { name: 'KB Halo', equip: 'KETTLEBELL', cue: 'Light KB. Circle the bell slowly around your head — controlled movement through full shoulder range of motion. Alternate direction each rep.' },
+      { name: 'Glute Bridge (Bodyweight)', equip: 'BODYWEIGHT', cue: 'Slow, deliberate. 3 seconds up, 2 second hold at top, 3 seconds down. Focus on the mind-muscle connection — feel the glute fire, not the hamstring.' },
+      { name: 'Bird Dog', equip: 'BODYWEIGHT', cue: 'Opposite arm + leg extend while maintaining a perfectly flat back. Hold 2 seconds. This resets the deep stabilisers and is one of the best deload movements there is.' }
+    ]
+  }
+];
+
+const MOBILITY = [
+  {
+    id: 'mob1',
+    name: '"Hip & Hinge Reset"',
+    tag: 'MOBILITY',
+    type: 'mobility',
+    focus: 'Hips, Hamstrings & Lower Back — after WOD 1/3/5',
+    color: '#ff9f3a',
+    day: 'THU',
+    duration: '20–25 min',
+    movements: [
+      { name: 'World\'s Greatest Stretch', equip: 'BODYWEIGHT', cue: 'Step into a deep lunge, place same-side hand on floor, then rotate and reach the other arm to the ceiling. 5 slow reps each side. Resets the body after heavy lunges and rows.' },
+      { name: '90/90 Hip Switches', equip: 'BODYWEIGHT', cue: 'Sit with both knees bent at 90° — one in front, one to the side. Rotate knees to opposite side WITHOUT using hands. Game-changer for hip internal and external rotation. 60s continuous.' },
+      { name: 'Prying Goblet Squat', equip: 'KETTLEBELL', cue: 'Hold your lightest KB at chest. Drop into deepest squat, heels on floor. Use elbows to gently push knees outward, rocking slightly side to side. Lubricates the adductors and ankles.' },
+      { name: 'Cat-Cow to Child\'s Pose', equip: 'BODYWEIGHT', cue: 'Inhale to arch (cow), exhale to round (cat) — 3 full seconds each direction. After 5 cycles, sink back into child\'s pose for a full lat and spine stretch. Relieves deadlift and squat tension.' },
+      { name: 'Pigeon Pose (Static)', equip: 'BODYWEIGHT', cue: 'From plank, bring one knee forward toward same-side wrist. Sink hips to floor. Breathe: 4-second inhale, 8-second exhale. This signals your nervous system out of fight-or-flight. 90s each side.' },
+      { name: 'Couch Stretch', equip: 'BODYWEIGHT', cue: 'Rear foot elevated on a couch or bench, front foot forward like a lunge. Push hips forward and stand tall — don\'t let your lower back arch. Targets quad tightness from thrusters and step-ups. 60s each side.' }
+    ]
+  },
+  {
+    id: 'mob2',
+    name: '"Thoracic & Shoulder Reset"',
+    tag: 'MOBILITY',
+    type: 'mobility',
+    focus: 'Upper Back, Chest & Shoulder Health — after WOD 2/4',
+    color: '#3adfff',
+    day: 'SUN',
+    duration: '20–25 min',
+    movements: [
+      { name: 'Thoracic Extension on Bench', equip: 'BENCH', cue: 'Sit in front of bench, clasp hands behind head, lean back over the edge — mid-back on the bench. Extend slowly over it. 10 reps. The single best thoracic opener available without equipment.' },
+      { name: 'Thread the Needle', equip: 'BODYWEIGHT', cue: 'Start in table-top. Slide one arm under your body along the floor, rotating until shoulder touches the ground. Hold 30s, feel the upper back release. Essential after overhead presses and renegade rows.' },
+      { name: 'Scapular Wall Slides', equip: 'BODYWEIGHT', cue: 'Back flat against wall — head, upper back, glutes, hands all touching. Slide arms from 90° up to full overhead. If your lower back peels off the wall, that gap is your mobility deficit to train.' },
+      { name: 'Doorway Chest Stretch', equip: 'BODYWEIGHT', cue: 'Forearms on door frame at 90°, step through and feel the pec stretch. Hold 60s each side. Directly counters the forward shoulder posture that builds up from pressing volume.' },
+      { name: 'Lat Stretch (Bar)', equip: 'PULL-UP BAR', cue: 'Hang from bar, feet on floor taking some weight. Shift hips to one side to bias that lat. 4-second inhale, 8-second exhale. Hold 45s each side. Undoes tightness from rows and pull-up work.' },
+      { name: 'Dead Hang', equip: 'PULL-UP BAR', cue: 'Full passive hang, arms shoulder-width. Let the whole spine decompress. On each exhale, consciously release tension in the shoulders and lower back. 45–60s total. Barefoot if possible — improves grip and foot arch.' }
+    ]
+  },
+  {
+    id: 'mob3',
+    name: '"10-Min Active Recovery"',
+    tag: 'MOBILITY',
+    type: 'mobility',
+    focus: 'Full Body Dynamic Recovery — post-WOD or any day',
+    color: '#b03aff',
+    day: 'ANY',
+    duration: '10 min',
+    movements: [
+      { name: 'World\'s Greatest Stretch', equip: 'BODYWEIGHT', cue: '60 seconds. Hips, T-spine, groin. Step into deep lunge → hand down → rotate and reach. Resets the whole body after heavy compound work. 30s each side.' },
+      { name: 'Cat-Cow to Child\'s Pose', equip: 'BODYWEIGHT', cue: '60 seconds. Spine and lower back. Relieves tension from deadlifts and squats. 5 cat-cow cycles then sink to child\'s pose. Breathe through your nose the whole time.' },
+      { name: '90/90 Hip Switches', equip: 'BODYWEIGHT', cue: '60 seconds. Hip internal and external rotation. Both knees at 90°, rotate side to side without hands. Opens up the hips for better squat depth next session.' },
+      { name: 'Prying Goblet Squat', equip: 'KETTLEBELL', cue: '60 seconds. Adductors and ankles. Light KB at chest, sink into squat, use elbows to push knees out, rock side to side gently. Don\'t grind — this should feel like relief.' },
+      { name: 'Thread the Needle', equip: 'BODYWEIGHT', cue: '60 seconds. Upper back and shoulders. Table-top position, slide one arm under body until shoulder meets floor. Essential after overhead presses and renegade rows. 30s each side.' },
+      { name: 'Scapular Wall Slides', equip: 'BODYWEIGHT', cue: '60 seconds. Shoulder mobility and posture. Everything touching the wall. Slide arms up and down slowly. Corrects posture and improves overhead range for next pressing session.' },
+      { name: 'Pigeon Pose (Static)', equip: 'BODYWEIGHT', cue: '60 seconds. Glutes and piriformis. Deep release for the posterior chain. Breathe: 4-second inhale, 8-second exhale. This ratio signals your nervous system into recovery mode. 30s each side.' },
+      { name: 'Couch Stretch', equip: 'BODYWEIGHT', cue: '60 seconds. Quads and hip flexors. Rear foot on bench, front foot forward. Targets tightness from thrusters, step-ups, and high-rep lunges. 30s each side. Stand tall, don\'t arch the lower back.' }
+    ]
+  }
+];
+
+const ALL_SESSIONS = [...WODS, ...WODS_EXTRA, ...MOBILITY];
+
+const SCHEDULE = [
+  { day: 'MON', wod: 1, type: 'wod' },
+  { day: 'TUE', wod: 2, type: 'wod' },
+  { day: 'WED', wod: 3, type: 'wod' },
+  { day: 'THU', wod: 'mob1', type: 'mobility', label: 'MOBILITY' },
+  { day: 'FRI', wod: 4, type: 'wod' },
+  { day: 'SAT', wod: 5, type: 'wod' },
+  { day: 'SUN', wod: 'mob2', type: 'mobility', label: 'MOBILITY' }
+];
+
+// ═══════════════════════════════
+// STATE
+// ═══════════════════════════════
+let selectedWOD = null;
+let selectedFinisher = null;
+let workoutMode = 'circuit'; // 'circuit' | 'station'
+let timerInterval = null;
+let isRunning = false;
+let currentPhase = 'work'; // 'work' | 'rest' | 'roundRest'
+let timeLeft = 45;
+let currentMovement = 0;
+let currentRound = 1;
+let sessionStartTime = null;
+let totalElapsed = 0;
+let repsThisRound = 0;
+let repHistory = {}; // { round_movIndex: reps }
+
+let settings = {
+  work: 60,
+  rest: 15,
+  roundRest: 60,
+  rounds: 4,
+  sound: true
+};
+
+let workoutLog = JSON.parse(localStorage.getItem('recompLog') || '[]');
+
+// ═══════════════════════════════
+// AUDIO
+// ═══════════════════════════════
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx;
+
+function beep(freq = 880, duration = 0.1, vol = 0.3) {
+  if (!settings.sound) return;
+  try {
+    if (!audioCtx) audioCtx = new AudioCtx();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.start(audioCtx.currentTime);
+    osc.stop(audioCtx.currentTime + duration);
+  } catch(e) {}
+}
+
+function tripleBeep() { beep(1200, 0.08); setTimeout(() => beep(1200, 0.08), 120); setTimeout(() => beep(1600, 0.15), 240); }
+function restBeep() { beep(600, 0.15); }
+function countdownBeep() { beep(440, 0.06, 0.15); }
+
+// ═══════════════════════════════
+// INIT
+// ═══════════════════════════════
+function init() {
+  renderSchedule();
+  renderAllSessions();
+  renderFinishers();
+  renderLog();
+  updateSettingsUI();
+  updateStreakBadge();
+}
+
+let activeFilter = 'all';
+
+function filterCat(cat, el) {
+  activeFilter = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderAllSessions();
+}
+
+function renderSchedule() {
+  const today = new Date().getDay();
+  const dayMap = [6, 0, 1, 2, 3, 4, 5];
+  const todayIdx = dayMap[today];
+
+  document.getElementById('scheduleRow').innerHTML = SCHEDULE.map((s, i) => {
+    const isToday = i === todayIdx;
+    let color = 'var(--muted)';
+    let label = 'REST';
+
+    if (s.type === 'wod') {
+      const wod = WODS.find(w => w.id === s.wod);
+      if (wod) { color = wod.color; label = `WOD ${s.wod}`; }
+    } else if (s.type === 'mobility') {
+      const mob = MOBILITY.find(m => m.id === s.wod);
+      if (mob) { color = mob.color; label = 'MOB'; }
+    }
+
+    return `
+      <div class="schedule-day ${s.type !== 'wod' && s.type !== 'mobility' ? 'rest' : ''} ${isToday ? 'today' : ''}">
+        <div class="day-name">${s.day}</div>
+        <div class="day-wod" style="color:${color}">${label}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderAllSessions() {
+  const grid = document.getElementById('wodGrid');
+  let sessions = [];
+
+  if (activeFilter === 'all') {
+    sessions = [...WODS, ...WODS_EXTRA, ...MOBILITY];
+  } else if (activeFilter === 'wod') {
+    sessions = [...WODS];
+  } else if (activeFilter === 'extra') {
+    sessions = [...WODS_EXTRA];
+  } else if (activeFilter === 'mobility') {
+    sessions = [...MOBILITY];
+  } else if (activeFilter === 'deload') {
+    sessions = WODS_EXTRA.filter(w => w.type === 'deload');
+  }
+
+  grid.innerHTML = sessions.map(s => {
+    if (s.type === 'mobility') return renderMobilityCard(s);
+    return renderWodCard(s);
+  }).join('');
+}
+
+function renderWodCard(w) {
+  const typeLabel = w.type === 'deload' ? 'DELOAD' : w.type === 'strength' ? 'UNILATERAL' : 'WOD';
+  return `
+    <div class="wod-card" id="card-${w.id}" style="--card-color:${w.color}" onclick="selectSession('${w.id}')">
+      <div class="wod-number">${w.id}</div>
+      <div class="wod-tag">${w.tag} &nbsp;·&nbsp; ${typeLabel}</div>
+      <div class="wod-name">${w.name}</div>
+      <div class="wod-focus">${w.focus}</div>
+      <div class="wod-movements">
+        ${w.movements.map(m => `<div class="wod-movement-item">${m.name}</div>`).join('')}
+      </div>
+      <div class="wod-card-actions">
+        <button class="wod-quick-start" onclick="quickStart('${w.id}', event)">▶ GO</button>
+      </div>
+    </div>`;
+}
+
+function renderMobilityCard(m) {
+  const isShort = m.id === 'mob3';
+  return `
+    <div class="mobility-card" id="card-${m.id}" style="--card-color:${m.color}" onclick="selectSession('${m.id}')">
+      <div class="wod-tag">${m.tag} &nbsp;·&nbsp; ${m.duration.toUpperCase()}</div>
+      <div class="wod-name">${m.name}</div>
+      <div class="wod-focus">${m.focus}</div>
+      <div class="mob-duration">
+        ${m.movements.length} movements · hold-based${isShort ? ' · 🦶 barefoot recommended' : ''}
+      </div>
+      <div class="wod-movements" style="margin-top:12px">
+        ${m.movements.map(mv => `<div class="wod-movement-item">${mv.name}</div>`).join('')}
+      </div>
+      <div class="wod-card-actions">
+        <button class="wod-quick-start" onclick="quickStart('${m.id}', event)">▶ GO</button>
+      </div>
+    </div>`;
+}
+
+function renderFinishers() {
+  document.getElementById('finisherCards').innerHTML = FINISHERS.map((f, idx) => `
+    <div class="finisher-card" id="finisher-${idx}" onclick="selectFinisher(${idx})">
+      <div class="finisher-card-name">${f.name}</div>
+      <div class="finisher-card-focus">${f.focus}</div>
+      <div class="finisher-segments">
+        ${f.segments.map(s => `
+          <div class="finisher-seg">
+            <span>${s.time}</span>
+            <span>${s.ex}</span>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function selectFinisher(idx) {
+  if (selectedFinisher === idx) {
+    // Deselect
+    selectedFinisher = null;
+    document.querySelectorAll('.finisher-card').forEach(c => c.classList.remove('selected'));
+  } else {
+    selectedFinisher = idx;
+    document.querySelectorAll('.finisher-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById(`finisher-${idx}`).classList.add('selected');
+  }
+}
+
+function setMode(mode) {
+  workoutMode = mode;
+  document.getElementById('modeCircuit').classList.toggle('active', mode === 'circuit');
+  document.getElementById('modeStation').classList.toggle('active', mode === 'station');
+  const desc = document.getElementById('modeDesc');
+  if (mode === 'circuit') {
+    desc.textContent = 'Circuit: cycle through all 6 movements each round, repeat for X rounds.';
+  } else {
+    desc.textContent = 'Station: complete all rounds of one movement before moving to the next.';
+  }
+}
+
+// ═══════════════════════════════
+// WOD SELECTION
+// ═══════════════════════════════
+function selectSession(id) {
+  const session = ALL_SESSIONS.find(s => String(s.id) === String(id));
+  if (!session) return;
+  selectedWOD = session;
+
+  document.querySelectorAll('.wod-card, .mobility-card').forEach(c => c.classList.remove('selected'));
+  const card = document.getElementById(`card-${id}`);
+  if (card) card.classList.add('selected');
+
+  const btn = document.getElementById('startBtn');
+  btn.disabled = false;
+
+  if (session.type === 'mobility') {
+    btn.textContent = `🧘 BEGIN ${session.name}`;
+    btn.style.background = session.color;
+    btn.style.color = '#000';
+  } else if (session.type === 'deload') {
+    btn.textContent = `🔄 START ${session.name}`;
+    btn.style.background = session.color;
+    btn.style.color = '#000';
+  } else {
+    btn.textContent = `▶ START ${session.name}`;
+    btn.style.background = session.color;
+    btn.style.color = '#000';
+  }
+}
+
+function adjTimerInline(key, delta) {
+  // Lock rounds once session has started
+  if (key === 'rounds' && sessionStartTime) return;
+  const min = { work: 15, rest: 5, roundRest: 10, rounds: 1 };
+  const max = { work: 180, rest: 60, roundRest: 180, rounds: 8 };
+  settings[key] = Math.min(max[key], Math.max(min[key], settings[key] + delta));
+  updateSettingsUI();
+  updateInlineTimerUI();
+  // If not running, sync timeLeft to new work value
+  if (!isRunning && currentPhase === 'work') {
+    timeLeft = settings.work;
+    updateTimerDisplay();
+  }
+}
+
+function lockRoundsIfRunning() {
+  const group = document.getElementById('inlineRoundsGroup');
+  if (group) group.classList.toggle('locked', !!sessionStartTime);
+}
+
+function updateInlineTimerUI() {
+  const w = document.getElementById('inlineWork');
+  const r = document.getElementById('inlineRest');
+  const rd = document.getElementById('inlineRounds');
+  if (w) w.textContent = settings.work + 's';
+  if (r) r.textContent = settings.rest + 's';
+  if (rd) rd.textContent = settings.rounds;
+}
+
+function goToTimer() {
+  if (!selectedWOD) return;
+  resetTimerState();
+  renderMovementList();
+  renderRoundDots();
+  updateMovementDisplay();
+  updateInlineTimerUI();
+
+  // Show finisher banner if one is selected
+  const banner = document.getElementById('finisherBanner');
+  if (selectedFinisher !== null) {
+    banner.textContent = `🔥 FINISHER QUEUED: ${FINISHERS[selectedFinisher].name}`;
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+
+  showView('timer');
+  document.getElementById('timerTab').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════════════════════
+// TIMER ENGINE
+// ═══════════════════════════════
+function resetTimerState() {
+  clearInterval(timerInterval);
+  isRunning = false;
+  currentPhase = 'work';
+  timeLeft = settings.work;
+  currentMovement = 0;
+  currentRound = 1;
+  repsThisRound = 0;
+  repHistory = {};
+  sessionStartTime = null;
+  totalElapsed = 0;
+  document.getElementById('playPauseBtn').textContent = '▶ START';
+  document.getElementById('repCount').textContent = '0';
+  document.getElementById('beatBook').classList.remove('show');
+  updateTimerDisplay();
+  updatePhaseUI();
+  updateInlineTimerUI();
+  lockRoundsIfRunning();
+}
+
+function toggleTimer() {
+  if (!audioCtx) audioCtx = new AudioCtx();
+  if (isRunning) {
+    pauseTimer();
+  } else {
+    startTimer();
+  }
+}
+
+function startTimer() {
+  if (!sessionStartTime) sessionStartTime = Date.now();
+  isRunning = true;
+  document.getElementById('playPauseBtn').textContent = '⏸ PAUSE';
+  lockRoundsIfRunning();
+  timerInterval = setInterval(tick, 1000);
+}
+
+function pauseTimer() {
+  isRunning = false;
+  document.getElementById('playPauseBtn').textContent = '▶ RESUME';
+  clearInterval(timerInterval);
+}
+
+function tick() {
+  totalElapsed++;
+  timeLeft--;
+
+  // Countdown beeps
+  if (timeLeft <= 3 && timeLeft > 0) countdownBeep();
+
+  if (timeLeft <= 0) {
+    nextPhase();
+    return;
+  }
+
+  updateTimerDisplay();
+}
+
+function nextPhase() {
+  if (currentPhase === 'work') {
+    repHistory[`${currentRound}_${currentMovement}`] = repsThisRound;
+    tripleBeep();
+
+    if (workoutMode === 'circuit') {
+      // CIRCUIT: all movements → next round
+      if (currentMovement < selectedWOD.movements.length - 1) {
+        currentPhase = 'rest';
+        timeLeft = settings.rest;
+      } else {
+        // End of all movements — go to next round or finish
+        if (currentRound < settings.rounds) {
+          currentPhase = 'roundRest';
+          timeLeft = settings.roundRest;
+        } else {
+          clearInterval(timerInterval);
+          isRunning = false;
+          showComplete();
+          return;
+        }
+      }
+    } else {
+      // STATION: all rounds of this movement → next movement
+      if (currentRound < settings.rounds) {
+        // More rounds of this same movement
+        currentPhase = 'rest';
+        timeLeft = settings.rest;
+      } else {
+        // Done all rounds of this movement — move to next movement
+        if (currentMovement < selectedWOD.movements.length - 1) {
+          currentPhase = 'roundRest';
+          timeLeft = settings.roundRest;
+        } else {
+          // All movements done — finished
+          clearInterval(timerInterval);
+          isRunning = false;
+          showComplete();
+          return;
+        }
+      }
+    }
+  } else if (currentPhase === 'rest') {
+    restBeep();
+    repsThisRound = 0;
+    document.getElementById('repCount').textContent = '0';
+    currentPhase = 'work';
+    timeLeft = settings.work;
+
+    if (workoutMode === 'circuit') {
+      currentMovement++;
+    } else {
+      // Station: next round of same movement
+      currentRound++;
+    }
+
+    updateMovementDisplay();
+    renderMovementList();
+    renderRoundDots();
+    checkBeatTheBook();
+  } else if (currentPhase === 'roundRest') {
+    tripleBeep();
+    repsThisRound = 0;
+    document.getElementById('repCount').textContent = '0';
+    currentPhase = 'work';
+    timeLeft = settings.work;
+
+    if (workoutMode === 'circuit') {
+      currentRound++;
+      currentMovement = 0;
+    } else {
+      // Station: move to next movement, reset round counter
+      currentMovement++;
+      currentRound = 1;
+    }
+
+    updateMovementDisplay();
+    renderMovementList();
+    renderRoundDots();
+    checkBeatTheBook();
+  }
+
+  updateTimerDisplay();
+  updatePhaseUI();
+}
+
+function skipPhase() {
+  timeLeft = 1;
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  isRunning = false;
+  if (currentRound > 1 || currentMovement > 0) {
+    showComplete();
+  } else {
+    resetTimerState();
+  }
+}
+
+function updateTimerDisplay() {
+  const el = document.getElementById('timerDisplay');
+  el.textContent = timeLeft;
+
+  // Ring progress
+  const max = currentPhase === 'work' ? settings.work :
+              currentPhase === 'rest' ? settings.rest : settings.roundRest;
+  const pct = timeLeft / max;
+  const circ = 603.19;
+  const offset = circ * (1 - pct);
+  document.getElementById('ringProgress').style.strokeDashoffset = offset;
+
+  // Round label — context-aware per mode
+  if (workoutMode === 'circuit') {
+    document.getElementById('roundLabel').textContent =
+      `ROUND ${currentRound} / ${settings.rounds}`;
+  } else {
+    document.getElementById('roundLabel').textContent =
+      `MOVE ${currentMovement + 1}/${selectedWOD ? selectedWOD.movements.length : 6} · SET ${currentRound}/${settings.rounds}`;
+  }
+}
+
+function updatePhaseUI() {
+  const label = document.getElementById('phaseLabel');
+  const ring = document.getElementById('ringProgress');
+
+  if (currentPhase === 'work') {
+    label.textContent = 'WORK';
+    label.className = 'phase-label work';
+    ring.style.stroke = selectedWOD ? selectedWOD.color : '#e8ff3a';
+  } else if (currentPhase === 'rest') {
+    label.textContent = 'REST';
+    label.className = 'phase-label rest';
+    ring.style.stroke = '#3adfff';
+  } else {
+    label.textContent = 'ROUND REST';
+    label.className = 'phase-label round-rest';
+    ring.style.stroke = '#ff5a3a';
+  }
+}
+
+// ═══════════════════════════════
+// TODO: EXERCISE IMAGES — follow-up task
+// Source: yuhonas/free-exercise-db (public domain, no API key needed)
+// Base URL: https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/
+// Each exercise folder contains 0.jpg and 1.jpg.
+// Implementation plan:
+//   1. Build EXERCISE_IMAGES map: { movementName: 'Folder_Name' } for all 42 movements
+//   2. In updateMovementDisplay(), call loadExerciseImages(mv.name)
+//   3. loadExerciseImages() sets imgA.src = base+folder+'/0.jpg', imgB.src = .../1.jpg
+//   4. setInterval at 900ms toggles a CSS class to flip between frames (simulates GIF)
+//   5. onerror falls back gracefully to a placeholder
+//   6. clearInterval on movement change and timer reset
+// All folder name mappings already drafted — see CONTEXT.md for the full map.
+// ═══════════════════════════════
+
+function updateMovementDisplay() {
+  if (!selectedWOD) return;
+  const mv = selectedWOD.movements[currentMovement];
+  document.getElementById('exName').textContent = mv.name;
+  document.getElementById('exCue').textContent = mv.cue;
+  // TODO: loadExerciseImages(mv.name) — wire in when image follow-up is implemented
+
+  // Show breathing cue for mobility sessions
+  const beatEl = document.getElementById('beatBook');
+  if (selectedWOD.type === 'mobility') {
+    const cueText = mv.cue.toLowerCase();
+    if (cueText.includes('4-second') || cueText.includes('4 second') || cueText.includes('exhale')) {
+      beatEl.textContent = '🌬 BREATHING: 4-sec inhale (nose) · 8-sec exhale';
+      beatEl.classList.add('show');
+    } else {
+      beatEl.textContent = '🌬 Breathe slowly through your nose';
+      beatEl.classList.add('show');
+    }
+  } else {
+    beatEl.classList.remove('show');
+  }
+}
+
+function renderMovementList() {
+  if (!selectedWOD) return;
+  document.getElementById('movementListItems').innerHTML =
+    selectedWOD.movements.map((mv, i) => {
+      let isActive, done;
+      if (workoutMode === 'circuit') {
+        isActive = i === currentMovement && currentPhase !== 'roundRest';
+        done = i < currentMovement || currentPhase === 'roundRest';
+      } else {
+        // Station mode: movements before current are fully done
+        isActive = i === currentMovement;
+        done = i < currentMovement;
+      }
+
+      return `
+        <div class="movement-item ${isActive ? 'active' : ''} ${done ? 'done' : ''}">
+          <div class="mv-num">${i + 1}</div>
+          <div class="mv-info">
+            <div class="mv-name">${mv.name}</div>
+            <div class="mv-equip">${mv.equip}${workoutMode === 'station' && isActive ? ` · SET ${currentRound}/${settings.rounds}` : ''}</div>
+          </div>
+          <div class="mv-check">${done ? '✓' : ''}</div>
+        </div>`;
+    }).join('');
+}
+
+function renderRoundDots() {
+  const count = settings.rounds;
+  document.getElementById('roundDots').innerHTML =
+    Array.from({ length: count }, (_, i) => {
+      const cls = i + 1 < currentRound ? 'done' :
+                  i + 1 === currentRound ? 'current' : '';
+      return `<div class="round-dot ${cls}" title="${workoutMode === 'station' ? `Set ${i+1}` : `Round ${i+1}`}"></div>`;
+    }).join('');
+}
+
+// ═══════════════════════════════
+// REP TRACKING / BEAT THE BOOK
+// ═══════════════════════════════
+function adjustReps(delta) {
+  repsThisRound = Math.max(0, repsThisRound + delta);
+  document.getElementById('repCount').textContent = repsThisRound;
+}
+
+function checkBeatTheBook() {
+  if (currentRound <= 1) {
+    document.getElementById('beatBook').classList.remove('show');
+    return;
+  }
+  const key = `${1}_${currentMovement}`;
+  const r1reps = repHistory[key];
+  if (r1reps !== undefined) {
+    const el = document.getElementById('beatBook');
+    el.textContent = `📖 BEAT THE BOOK: Beat ${r1reps} reps from Round 1`;
+    el.classList.add('show');
+  }
+}
+
+// ═══════════════════════════════
+// COMPLETE
+// ═══════════════════════════════
+// ═══════════════════════════════
+// CELEBRATION
+// ═══════════════════════════════
+const MOTIVATORS = {
+  1: [ // The Foundation
+    "Lower body day done. Every squat rep is a deposit in the glute bank — and you're building interest.",
+    "Quads, hamstrings, glutes — all taxed. That burn you feel? That's fat looking for the exit.",
+    "The foundation is solid. Your posterior chain just got a lesson it won't forget."
+  ],
+  2: [ // The Engine
+    "Push, pull, stabilise. Your core held the whole thing together today. That's the engine running.",
+    "Upper body done. Those renegade rows alone are worth bragging about.",
+    "Overhead, rows, floor press. You just built the chassis. Now we fill it with muscle."
+  ],
+  3: [ // The Hinge
+    "Posterior chain session complete. The deadlift doesn't lie — you showed up and pulled.",
+    "Hinge pattern locked in. Your lower back, glutes, and core all filed a complaint. That's the point.",
+    "Suitcase carries and hollow holds — the gut-tightening combo. The transverse abdominis says thank you."
+  ],
+  4: [ // The Metabolic Torch
+    "Full body torched. The metabolic afterburn from this one lasts hours. You're still burning.",
+    "Thrusters, devil's press, power cleans — that's not a workout, that's an event. You finished it.",
+    "Heart rate spiked, calories incinerated. The plateau doesn't stand a chance against this kind of output."
+  ],
+  5: [ // The Finisher
+    "Volume session done. Time under tension was high today — that's the hypertrophy signal your body needed.",
+    "Front squats, snatches, curls to press. You hit everything. The muscles will be talking tomorrow.",
+    "Saturday session complete. You showed up when most people don't. That's the compounding advantage."
+  ],
+  6: [ // The Asymmetry
+    "Unilateral work done. Left-right balance is the quiet multiplier — you just invested in it.",
+    "Split squats, single-leg RDLs, pull-up negatives. The imbalances don't know what hit them.",
+    "One side at a time. Hardest work in the gym and you did it. The symmetry will show."
+  ],
+  7: [ // The Restore
+    "Deload done right. Active recovery is training — the nervous system needed this as much as the muscles.",
+    "Good mornings, bird dogs, dead hangs. The body resets, the joints recover. Smart session.",
+    "Recovery isn't optional, it's the other half of the programme. Today you did the full job."
+  ],
+  mob: [
+    "Mobility work done. This is the session most people skip. You didn't.",
+    "Hip flexors, T-spine, shoulders — all opened up. Next WOD will feel completely different.",
+    "Ten minutes of this is worth more than an hour of lifting with locked-up joints. Well done."
+  ]
+};
+
+function getMotivator(wod) {
+  if (!wod) return '';
+  const key = wod.type === 'mobility' ? 'mob' : wod.id;
+  const pool = MOTIVATORS[key] || MOTIVATORS[1];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function victoryFanfare() {
+  if (!settings.sound) return;
+  try {
+    if (!audioCtx) audioCtx = new AudioCtx();
+    const notes = [523, 659, 784, 1047]; // C5 E5 G5 C6
+    notes.forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'triangle';
+      osc.frequency.value = freq;
+      const t = audioCtx.currentTime + i * 0.13;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.25, t + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+      osc.start(t);
+      osc.stop(t + 0.35);
+    });
+  } catch(e) {}
+}
+
+// ── Confetti ──
+let confettiParticles = [];
+let confettiRAF = null;
+
+function launchConfetti() {
+  const canvas = document.getElementById('celebrationCanvas');
+  canvas.style.display = 'block';
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  confettiParticles = [];
+
+  const colors = ['#e8ff3a','#ff5a3a','#3adfff','#b03aff','#3affa0','#ffffff','#ff9f3a'];
+  for (let i = 0; i < 140; i++) {
+    confettiParticles.push({
+      x: Math.random() * canvas.width,
+      y: -10 - Math.random() * 200,
+      w: 6 + Math.random() * 8,
+      h: 3 + Math.random() * 5,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      vx: (Math.random() - 0.5) * 4,
+      vy: 2 + Math.random() * 4,
+      rot: Math.random() * Math.PI * 2,
+      rotV: (Math.random() - 0.5) * 0.2,
+      opacity: 1
+    });
+  }
+
+  cancelAnimationFrame(confettiRAF);
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    confettiParticles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.07; // gravity
+      p.rot += p.rotV;
+      if (p.y > canvas.height * 0.7) p.opacity -= 0.025;
+      if (p.opacity > 0) {
+        alive = true;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.opacity);
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      }
+    });
+    if (alive) confettiRAF = requestAnimationFrame(draw);
+    else { canvas.style.display = 'none'; }
+  }
+  draw();
+}
+
+function stopConfetti() {
+  cancelAnimationFrame(confettiRAF);
+  const canvas = document.getElementById('celebrationCanvas');
+  canvas.style.display = 'none';
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function showComplete() {
+  const elapsed = Math.floor(totalElapsed / 60);
+  const moveCount = selectedWOD ? selectedWOD.movements.length : '—';
+
+  document.getElementById('completeWodName').textContent =
+    `${selectedWOD.tag} — ${selectedWOD.name}`;
+  document.getElementById('completeRounds').textContent = currentRound;
+  document.getElementById('completeTime').textContent = `${elapsed}m`;
+  document.getElementById('completeMoves').textContent = `${moveCount}`;
+  document.getElementById('completeMotivator').textContent = getMotivator(selectedWOD);
+
+  // Icon varies by WOD type
+  const icons = { mobility: '🧘', deload: '🔄', strength: '⚡' };
+  document.getElementById('completeIcon').textContent =
+    icons[selectedWOD?.type] || '🏆';
+
+  document.getElementById('completeOverlay').classList.add('show');
+  window.scrollTo({ top: 0 });
+
+  // Celebrate!
+  setTimeout(launchConfetti, 150);
+  setTimeout(victoryFanfare, 100);
+}
+
+function closeComplete() {
+  document.getElementById('completeOverlay').classList.remove('show');
+  stopConfetti();
+  if (selectedFinisher !== null) {
+    launchFinisherTimer();
+  } else {
+    showView('select');
+  }
+}
+
+function saveAndClose() {
+  const entry = {
+    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    wod: selectedWOD.id,
+    wodName: selectedWOD.name,
+    wodTag: selectedWOD.tag,
+    focus: selectedWOD.focus,
+    color: selectedWOD.color,
+    type: selectedWOD.type || 'wod',
+    rounds: currentRound,
+    duration: Math.floor(totalElapsed / 60)
+  };
+  workoutLog.unshift(entry);
+  localStorage.setItem('recompLog', JSON.stringify(workoutLog));
+  document.getElementById('completeOverlay').classList.remove('show');
+  stopConfetti();
+  // Launch finisher if selected
+  if (selectedFinisher !== null) {
+    launchFinisherTimer();
+  } else {
+    renderLog();
+    updateStreakBadge();
+    showView('log');
+  }
+}
+
+// ═══════════════════════════════
+// LOG
+// ═══════════════════════════════
+function renderLog() {
+  const list = document.getElementById('logList');
+
+  if (workoutLog.length === 0) {
+    list.innerHTML = '<div class="log-empty">NO SESSIONS LOGGED YET<br><br>Complete a WOD to see your history.</div>';
+  } else {
+    list.innerHTML = workoutLog.map((e, idx) => `
+      <div class="log-entry">
+        <div class="log-color-bar" style="background:${e.color}"></div>
+        <div>
+          <div class="log-wod-name">${e.wodTag} ${e.wodName}</div>
+          <div class="log-meta">${e.date} · ${e.rounds} ROUNDS</div>
+        </div>
+        <div class="log-stats">
+          <div class="log-stat-val">${e.duration}m</div>
+          <div class="log-stat-label">DURATION</div>
+          <button class="log-share-btn" onclick="shareSession(${idx}, this)">SHARE</button>
+        </div>
+      </div>`).join('');
+  }
+
+  // Stats
+  const total = workoutLog.length;
+  const totalMin = workoutLog.reduce((a, e) => a + e.duration, 0);
+  const streak = calcStreak();
+  const fave = calcFaveWOD();
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statTime').textContent = totalMin > 0 ? `${totalMin}m` : '0m';
+  document.getElementById('statStreak').textContent = streak;
+  document.getElementById('statFave').textContent = fave ? `W${fave}` : '—';
+}
+
+function calcStreak() {
+  if (workoutLog.length === 0) return 0;
+  let streak = 0;
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  let checkDate = new Date(today);
+
+  for (let i = 0; i < 30; i++) {
+    const dateStr = checkDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    if (workoutLog.some(e => e.date === dateStr)) {
+      streak++;
+      checkDate.setDate(checkDate.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+function calcFaveWOD() {
+  if (workoutLog.length === 0) return null;
+  const counts = {};
+  workoutLog.forEach(e => counts[e.wod] = (counts[e.wod] || 0) + 1);
+  return Object.entries(counts).sort((a,b) => b[1]-a[1])[0]?.[0];
+}
+
+function updateStreakBadge() {
+  document.getElementById('streakNum').textContent = calcStreak();
+}
+
+// ═══════════════════════════════
+// SETTINGS
+// ═══════════════════════════════
+function adjustSetting(key, delta) {
+  const min = { work: 20, rest: 5, roundRest: 10, rounds: 1 };
+  const max = { work: 120, rest: 60, roundRest: 180, rounds: 8 };
+  settings[key] = Math.min(max[key], Math.max(min[key], settings[key] + delta));
+  updateSettingsUI();
+}
+
+function updateSettingsUI() {
+  document.getElementById('setWork').textContent = settings.work;
+  document.getElementById('setRest').textContent = settings.rest;
+  document.getElementById('setRoundRest').textContent = settings.roundRest;
+  document.getElementById('setRounds').textContent = settings.rounds;
+}
+
+function toggleSound() {
+  settings.sound = !settings.sound;
+  document.getElementById('soundToggle').textContent = settings.sound ? '🔊 ON' : '🔇 OFF';
+}
+
+// ═══════════════════════════════
+// NAV
+// ═══════════════════════════════
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`view-${name}`).classList.add('active');
+
+  const tabs = { select: 0, timer: 1, log: 2, settings: 3 };
+  document.querySelectorAll('.nav-tab')[tabs[name]]?.classList.add('active');
+}
+
+function quickStart(id, e) {
+  e.stopPropagation(); // don't also fire the card's selectSession
+  selectSession(id);
+  goToTimer();
+}
+
+// ═══════════════════════════════
+// SHARE
+// ═══════════════════════════════
+function buildShareText(entry) {
+  const session = ALL_SESSIONS.find(s => String(s.id) === String(entry.wod));
+  const movements = session ? session.movements.map((m, i) => `  ${i + 1}. ${m.name}`).join('\n') : '';
+
+  return [
+    `💪 RECOMP WOD — ${entry.date}`,
+    ``,
+    `${entry.wodTag} ${entry.wodName}`,
+    entry.focus || '',
+    ``,
+    `📋 Movements:`,
+    movements,
+    ``,
+    `⏱ ${entry.rounds} rounds · ${entry.duration} min`,
+    `Format: ${settings.work}s work / ${settings.rest}s rest`,
+  ].filter(l => l !== null).join('\n');
+}
+
+function shareSession(idx, btnEl) {
+  const entry = workoutLog[idx];
+  if (!entry) return;
+
+  const text = buildShareText(entry);
+  const title = `RECOMP — ${entry.wodTag} ${entry.wodName}`;
+
+  // Native share sheet (iOS/Android) — must be called synchronously inside the gesture
+  if (navigator.share) {
+    navigator.share({ title, text })
+      .catch(err => {
+        // AbortError = user dismissed sheet — that's fine, do nothing
+        if (err.name !== 'AbortError') fallbackShare(text, btnEl);
+      });
+    return;
+  }
+
+  // SMS deep link — opens Messages on iOS/macOS with text pre-filled
+  // (works without HTTPS, no permission needed)
+  const smsUrl = `sms:?&body=${encodeURIComponent(text)}`;
+  const smsLink = document.createElement('a');
+  smsLink.href = smsUrl;
+  smsLink.click();
+
+  // Also copy to clipboard as a bonus
+  fallbackShare(text, btnEl);
+}
+
+function fallbackShare(text, btnEl) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      btnEl.textContent = '✓ COPIED';
+      btnEl.classList.add('copied');
+      setTimeout(() => { btnEl.textContent = 'SHARE'; btnEl.classList.remove('copied'); }, 2500);
+    }).catch(() => window.prompt('Copy to send:', text));
+  } else {
+    window.prompt('Copy to send:', text);
+  }
+}
+let finisherInterval = null;
+let finisherRunning = false;
+let finisherTimeLeft = 180; // 3 minutes
+let finisherTotal = 180;
+
+function launchFinisherTimer() {
+  if (selectedFinisher === null) return;
+  const f = FINISHERS[selectedFinisher];
+  finisherTimeLeft = 180;
+  finisherTotal = 180;
+  finisherRunning = false;
+  clearInterval(finisherInterval);
+
+  document.getElementById('finisherTimerName').textContent = f.name;
+  document.getElementById('finisherPlayBtn').textContent = '▶ START';
+  updateFinisherDisplay();
+  updateFinisherSegDisplay();
+  document.getElementById('finisherOverlay').classList.add('show');
+}
+
+function toggleFinisherTimer() {
+  if (!audioCtx) audioCtx = new AudioCtx();
+  if (finisherRunning) {
+    finisherRunning = false;
+    clearInterval(finisherInterval);
+    document.getElementById('finisherPlayBtn').textContent = '▶ RESUME';
+  } else {
+    finisherRunning = true;
+    document.getElementById('finisherPlayBtn').textContent = '⏸ PAUSE';
+    finisherInterval = setInterval(finisherTick, 1000);
+  }
+}
+
+function finisherTick() {
+  finisherTimeLeft--;
+  if (finisherTimeLeft <= 3 && finisherTimeLeft > 0) countdownBeep();
+  if (finisherTimeLeft <= 0) {
+    clearInterval(finisherInterval);
+    finisherRunning = false;
+    tripleBeep(); tripleBeep();
+    document.getElementById('finisherPlayBtn').textContent = '✓ DONE';
+    document.getElementById('finisherBigTime').textContent = '0:00';
+    document.getElementById('finisherBigTime').classList.add('last');
+    return;
+  }
+  // Segment change beep at the 1-min and 2-min marks
+  if (finisherTimeLeft === 120 || finisherTimeLeft === 60) { tripleBeep(); }
+  updateFinisherDisplay();
+  updateFinisherSegDisplay();
+}
+
+function updateFinisherDisplay() {
+  const m = Math.floor(finisherTimeLeft / 60);
+  const s = finisherTimeLeft % 60;
+  document.getElementById('finisherBigTime').textContent = `${m}:${String(s).padStart(2,'0')}`;
+  const isLast = finisherTimeLeft <= 60;
+  document.getElementById('finisherBigTime').classList.toggle('last', isLast);
+}
+
+function updateFinisherSegDisplay() {
+  if (selectedFinisher === null) return;
+  const f = FINISHERS[selectedFinisher];
+  const elapsed = finisherTotal - finisherTimeLeft;
+  // Segments are 0–60s, 60–120s, 120–180s
+  const segIdx = Math.min(Math.floor(elapsed / 60), 2);
+  const seg = f.segments[segIdx];
+  const nextSeg = f.segments[segIdx + 1];
+
+  document.getElementById('finisherSegTime').textContent = seg.time;
+  document.getElementById('finisherSegEx').textContent = seg.ex;
+  document.getElementById('finisherSegNext').textContent = nextSeg
+    ? `NEXT: ${nextSeg.ex.split('—')[0].trim()}`
+    : '⚡ FINAL PUSH — EMPTY THE TANK';
+}
+
+function closeFinisherTimer() {
+  clearInterval(finisherInterval);
+  finisherRunning = false;
+  document.getElementById('finisherOverlay').classList.remove('show');
+  document.getElementById('finisherBigTime').classList.remove('last');
+  showView('select');
+}
+
+// ═══════════════════════════════
+// BOOT
+// ═══════════════════════════════
+init();
+</script>
+</body>
+</html>
