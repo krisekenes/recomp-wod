@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RECOMP — WOD Training System</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -416,54 +417,15 @@
     margin-bottom: 16px;
   }
 
-  .rep-tracker {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-
-  .rep-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--muted2);
-    letter-spacing: 1px;
-  }
-
-  .rep-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    width: 36px;
-    height: 36px;
-    font-size: 18px;
-    cursor: pointer;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
-  }
-
-  .rep-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-  .rep-count {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 36px;
-    color: var(--accent);
-    min-width: 40px;
-    text-align: center;
-  }
-
-  .beat-the-book {
+  .breathing-cue {
     margin-top: 12px;
     font-family: 'DM Mono', monospace;
     font-size: 11px;
-    color: var(--accent2);
+    color: var(--accent3);
     display: none;
   }
 
-  .beat-the-book.show { display: block; }
+  .breathing-cue.show { display: block; }
 
   /* ── MOVEMENT LIST SIDEBAR ── */
   .movement-list {
@@ -1433,15 +1395,8 @@
              Skipped today to ship a stable build. -->
 
         <div class="current-ex-cue" id="exCue">Select a WOD and hit start.</div>
+        <div class="breathing-cue" id="beatBook"></div>
 
-        <div class="rep-tracker">
-          <span class="rep-label">ROUND REPS:</span>
-          <button class="rep-btn" onclick="adjustReps(-1)">−</button>
-          <div class="rep-count" id="repCount">0</div>
-          <button class="rep-btn" onclick="adjustReps(1)">+</button>
-        </div>
-
-        <div class="beat-the-book" id="beatBook"></div>
       </div>
     </div>
 
@@ -1805,8 +1760,6 @@ let currentMovement = 0;
 let currentRound = 1;
 let sessionStartTime = null;
 let totalElapsed = 0;
-let repsThisRound = 0;
-let repHistory = {}; // { round_movIndex: reps }
 
 let settings = {
   work: 60,
@@ -2079,12 +2032,9 @@ function resetTimerState() {
   timeLeft = settings.work;
   currentMovement = 0;
   currentRound = 1;
-  repsThisRound = 0;
-  repHistory = {};
   sessionStartTime = null;
   totalElapsed = 0;
   document.getElementById('playPauseBtn').textContent = '▶ START';
-  document.getElementById('repCount').textContent = '0';
   document.getElementById('beatBook').classList.remove('show');
   updateTimerDisplay();
   updatePhaseUI();
@@ -2132,7 +2082,6 @@ function tick() {
 
 function nextPhase() {
   if (currentPhase === 'work') {
-    repHistory[`${currentRound}_${currentMovement}`] = repsThisRound;
     tripleBeep();
 
     if (workoutMode === 'circuit') {
@@ -2174,8 +2123,6 @@ function nextPhase() {
     }
   } else if (currentPhase === 'rest') {
     restBeep();
-    repsThisRound = 0;
-    document.getElementById('repCount').textContent = '0';
     currentPhase = 'work';
     timeLeft = settings.work;
 
@@ -2189,11 +2136,8 @@ function nextPhase() {
     updateMovementDisplay();
     renderMovementList();
     renderRoundDots();
-    checkBeatTheBook();
   } else if (currentPhase === 'roundRest') {
     tripleBeep();
-    repsThisRound = 0;
-    document.getElementById('repCount').textContent = '0';
     currentPhase = 'work';
     timeLeft = settings.work;
 
@@ -2209,7 +2153,6 @@ function nextPhase() {
     updateMovementDisplay();
     renderMovementList();
     renderRoundDots();
-    checkBeatTheBook();
   }
 
   updateTimerDisplay();
@@ -2345,27 +2288,6 @@ function renderRoundDots() {
     }).join('');
 }
 
-// ═══════════════════════════════
-// REP TRACKING / BEAT THE BOOK
-// ═══════════════════════════════
-function adjustReps(delta) {
-  repsThisRound = Math.max(0, repsThisRound + delta);
-  document.getElementById('repCount').textContent = repsThisRound;
-}
-
-function checkBeatTheBook() {
-  if (currentRound <= 1) {
-    document.getElementById('beatBook').classList.remove('show');
-    return;
-  }
-  const key = `${1}_${currentMovement}`;
-  const r1reps = repHistory[key];
-  if (r1reps !== undefined) {
-    const el = document.getElementById('beatBook');
-    el.textContent = `📖 BEAT THE BOOK: Beat ${r1reps} reps from Round 1`;
-    el.classList.add('show');
-  }
-}
 
 // ═══════════════════════════════
 // COMPLETE

@@ -33,8 +33,6 @@ Live at: **https://krisekenes.github.io/recomp-wod**
 - **Two Workout Modes**
   - **Circuit** — cycle all 6 movements per round, repeat for X rounds
   - **Station** — complete all sets of one movement before moving to the next
-- **Rep Tracking** — log reps per movement per round with +/− controls
-- **Beat the Book** — from Round 2 onward, shows your Round 1 rep count as a target
 - **Finisher Selection** — choose a 3-min finisher to queue before starting
 - **Session Log** — persisted to localStorage; tracks sessions, total time, streak, favourite WOD
 - **Streak Badge** — live streak count in the header
