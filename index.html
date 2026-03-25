@@ -762,6 +762,21 @@
   /* ── SETTINGS ── */
   .settings-grid { display: grid; gap: 16px; max-width: 600px; }
 
+  .setting-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    width: 160px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .setting-input:focus { border-color: var(--accent); }
+  .setting-input::placeholder { color: var(--muted); }
+
   .setting-row {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -1280,7 +1295,7 @@
 
 <header>
   <div>
-    <div class="logo">RECOMP<span>TRAINING SYSTEM</span></div>
+    <div class="logo">RECOMP<span id="userGreeting">TRAINING SYSTEM</span></div>
   </div>
   <div class="header-right">
     <div class="streak-badge">🔥 <span id="streakNum">0</span> DAY STREAK</div>
@@ -1428,6 +1443,16 @@
      VIEW: SETTINGS
      ════════════════════════════════════ -->
 <div class="view" id="view-settings">
+  <p class="section-title">PROFILE</p>
+  <div class="settings-grid" style="margin-bottom:28px;">
+    <div class="setting-row">
+      <div><div class="setting-label">YOUR NAME</div><div class="setting-desc">Shown in the header</div></div>
+      <div class="setting-control">
+        <input class="setting-input" id="nameInput" type="text" placeholder="Enter name" maxlength="20" onchange="saveUserName(this.value)" oninput="saveUserName(this.value)">
+      </div>
+    </div>
+  </div>
+
   <p class="section-title">TIMER SETTINGS</p>
   <div class="settings-grid">
     <div class="setting-row">
@@ -1751,7 +1776,7 @@ const SCHEDULE = [
 // ═══════════════════════════════
 let selectedWOD = null;
 let selectedFinisher = null;
-let workoutMode = 'circuit'; // 'circuit' | 'station'
+let workoutMode = 'circuit';
 let timerInterval = null;
 let isRunning = false;
 let currentPhase = 'work'; // 'work' | 'rest' | 'roundRest'
@@ -1761,15 +1786,24 @@ let currentRound = 1;
 let sessionStartTime = null;
 let totalElapsed = 0;
 
-let settings = {
-  work: 60,
-  rest: 15,
-  roundRest: 60,
-  rounds: 4,
-  sound: true
-};
+const defaultSettings = { work: 60, rest: 15, roundRest: 60, rounds: 4, sound: true };
+let settings = { ...defaultSettings, ...JSON.parse(localStorage.getItem('recompSettings') || '{}') };
+workoutMode = localStorage.getItem('recompMode') || 'circuit';
+
+let userName = localStorage.getItem('recompUserName') || '';
 
 let workoutLog = JSON.parse(localStorage.getItem('recompLog') || '[]');
+
+function saveUserPrefs() {
+  localStorage.setItem('recompSettings', JSON.stringify(settings));
+  localStorage.setItem('recompMode', workoutMode);
+}
+
+function saveUserName(name) {
+  userName = name.trim();
+  localStorage.setItem('recompUserName', userName);
+  updateUserGreeting();
+}
 
 // ═══════════════════════════════
 // AUDIO
@@ -1800,6 +1834,17 @@ function countdownBeep() { beep(440, 0.06, 0.15); }
 // ═══════════════════════════════
 // INIT
 // ═══════════════════════════════
+function updateUserGreeting() {
+  const el = document.getElementById('userGreeting');
+  if (userName) {
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? 'GOOD MORNING' : hour < 17 ? 'GOOD AFTERNOON' : 'GOOD EVENING';
+    el.textContent = `${greeting}, ${userName.toUpperCase()}`;
+  } else {
+    el.textContent = 'TRAINING SYSTEM';
+  }
+}
+
 function init() {
   renderSchedule();
   renderAllSessions();
@@ -1807,6 +1852,12 @@ function init() {
   renderLog();
   updateSettingsUI();
   updateStreakBadge();
+  updateUserGreeting();
+
+  // Restore persisted preferences
+  document.getElementById('nameInput').value = userName;
+  document.getElementById('soundToggle').textContent = settings.sound ? '🔊 ON' : '🔇 OFF';
+  setMode(workoutMode);
 }
 
 let activeFilter = 'all';
@@ -1939,6 +1990,7 @@ function setMode(mode) {
   } else {
     desc.textContent = 'Station: complete all rounds of one movement before moving to the next.';
   }
+  saveUserPrefs();
 }
 
 // ═══════════════════════════════
@@ -2564,6 +2616,7 @@ function adjustSetting(key, delta) {
   const max = { work: 120, rest: 60, roundRest: 180, rounds: 8 };
   settings[key] = Math.min(max[key], Math.max(min[key], settings[key] + delta));
   updateSettingsUI();
+  saveUserPrefs();
 }
 
 function updateSettingsUI() {
@@ -2576,6 +2629,7 @@ function updateSettingsUI() {
 function toggleSound() {
   settings.sound = !settings.sound;
   document.getElementById('soundToggle').textContent = settings.sound ? '🔊 ON' : '🔇 OFF';
+  saveUserPrefs();
 }
 
 // ═══════════════════════════════
