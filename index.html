@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RECOMP — WOD Training System</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -263,6 +268,21 @@
   .schedule-day.rest .day-wod { color: var(--muted); }
   .schedule-day.today { border-color: var(--accent); }
   .schedule-day.today .day-name { color: var(--accent); }
+
+  .rest-day-tip {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-top: 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted2);
+    line-height: 1.5;
+  }
+  .rest-day-tip.show { display: block; }
+  .rest-day-tip strong { color: var(--accent3); }
 
   /* ── START BTN ── */
   .start-btn {
@@ -713,6 +733,94 @@
     width: 4px;
     height: 40px;
     border-radius: 4px;
+  }
+
+  /* ── HISTORY CHART ── */
+  .history-chart {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+
+  .history-chart-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted2);
+    margin-bottom: 16px;
+  }
+
+  .history-weeks {
+    display: flex;
+    gap: 6px;
+  }
+
+  .history-week {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .history-week-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .history-days {
+    display: flex;
+    gap: 3px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .history-day {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+
+  .history-day.active { background: var(--accent); border-color: var(--accent); }
+  .history-day.today { border-color: var(--muted2); }
+
+  .history-bar-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 60px;
+    margin-top: 12px;
+  }
+
+  .history-bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+
+  .history-bar {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    background: var(--accent);
+    min-height: 2px;
+    transition: height 0.3s;
+  }
+
+  .history-bar-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
   }
 
   .log-wod-name {
@@ -1297,6 +1405,141 @@
     50% { color: var(--accent); }
   }
 
+  /* ── CUSTOM WOD BUILDER ── */
+  .builder-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    backdrop-filter: blur(12px);
+  }
+  .builder-overlay.show { opacity: 1; pointer-events: all; }
+
+  .builder-card {
+    background: var(--surface);
+    border: 1px solid var(--accent3);
+    border-radius: 20px;
+    padding: 28px 24px;
+    max-width: 560px;
+    width: 94%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 0 60px rgba(58,223,255,0.1);
+  }
+
+  .builder-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 3px;
+    margin-bottom: 4px;
+  }
+
+  .builder-subtitle {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted2);
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+
+  .builder-name-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 16px;
+    outline: none;
+  }
+  .builder-name-input:focus { border-color: var(--accent3); }
+  .builder-name-input::placeholder { color: var(--muted); }
+
+  .builder-pool-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted2);
+    margin-bottom: 8px;
+  }
+
+  .builder-selected {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+    min-height: 32px;
+  }
+
+  .builder-tag {
+    background: var(--accent3);
+    color: #000;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 1px;
+  }
+  .builder-tag:hover { opacity: 0.8; }
+
+  .builder-pool {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+  }
+
+  .builder-mv {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text);
+  }
+  .builder-mv:hover { border-color: var(--accent3); }
+  .builder-mv.picked { opacity: 0.3; pointer-events: none; }
+  .builder-mv-equip {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .builder-btns {
+    display: flex;
+    gap: 10px;
+  }
+
+  .builder-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+  }
+  .builder-btn.primary { background: var(--accent3); color: #000; }
+  .builder-btn.primary:disabled { opacity: 0.3; cursor: default; }
+  .builder-btn.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+
   /* ── RESPONSIVE ── */
   @media (max-width: 600px) {
     header { padding: 16px; }
@@ -1332,6 +1575,7 @@
 
   <p class="section-title">WEEKLY SCHEDULE</p>
   <div class="schedule-row" id="scheduleRow"></div>
+  <div class="rest-day-tip" id="restDayTip"></div>
 
   <p class="section-title">SELECT YOUR SESSION</p>
   <div class="cat-filter">
@@ -1340,6 +1584,8 @@
     <button class="cat-btn" data-cat="extra" onclick="filterCat('extra',this)">EXTRA</button>
     <button class="cat-btn" data-cat="mobility" onclick="filterCat('mobility',this)">MOBILITY</button>
     <button class="cat-btn" data-cat="deload" onclick="filterCat('deload',this)">DELOAD</button>
+    <button class="cat-btn" data-cat="custom" onclick="filterCat('custom',this)">CUSTOM</button>
+    <button class="cat-btn" style="background:var(--accent3);color:#000;border-color:var(--accent3);" onclick="openBuilder()">+ BUILD</button>
   </div>
   <div class="wod-grid" id="wodGrid"></div>
 
@@ -1451,6 +1697,8 @@
     <div class="stat-box"><div class="stat-val" id="statStreak">0</div><div class="stat-lbl">STREAK</div></div>
     <div class="stat-box"><div class="stat-val" id="statFave">—</div><div class="stat-lbl">FAV WOD</div></div>
   </div>
+  <div class="history-chart" id="historyChart"></div>
+
   <p class="section-title">SESSION HISTORY</p>
   <div id="logList"></div>
 </div>
@@ -1509,6 +1757,22 @@
         <button class="ctrl-btn" id="soundToggle" onclick="toggleSound()" style="font-size:11px;padding:8px 14px;">🔊 ON</button>
       </div>
     </div>
+    <div class="setting-row">
+      <div><div class="setting-label">VIBRATION</div><div class="setting-desc">Haptic feedback on phase changes</div></div>
+      <div class="setting-control">
+        <button class="ctrl-btn" id="vibrationToggle" onclick="toggleVibration()" style="font-size:11px;padding:8px 14px;">📳 ON</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="section-title">APPEARANCE</p>
+  <div class="settings-grid">
+    <div class="setting-row">
+      <div><div class="setting-label">THEME</div><div class="setting-desc">AMOLED saves battery on OLED screens</div></div>
+      <div class="setting-control">
+        <button class="ctrl-btn" id="themeToggle" onclick="toggleTheme()" style="font-size:11px;padding:8px 14px;">DARK</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1558,6 +1822,23 @@
     <div class="finisher-btns">
       <button class="finisher-ctrl-btn secondary" onclick="closeFinisherTimer()">✕ SKIP</button>
       <button class="finisher-ctrl-btn primary" id="finisherPlayBtn" onclick="toggleFinisherTimer()">▶ START</button>
+    </div>
+  </div>
+</div>
+
+<!-- Custom WOD Builder Overlay -->
+<div class="builder-overlay" id="builderOverlay">
+  <div class="builder-card">
+    <div class="builder-title">BUILD YOUR WOD</div>
+    <div class="builder-subtitle">PICK UP TO 6 MOVEMENTS</div>
+    <input class="builder-name-input" id="builderName" type="text" placeholder="WOD name (e.g. &quot;Leg Day&quot;)" maxlength="30">
+    <div class="builder-pool-label">SELECTED (<span id="builderCount">0</span>/6)</div>
+    <div class="builder-selected" id="builderSelected"></div>
+    <div class="builder-pool-label">MOVEMENT POOL</div>
+    <div class="builder-pool" id="builderPool"></div>
+    <div class="builder-btns">
+      <button class="builder-btn secondary" onclick="closeBuilder()">CANCEL</button>
+      <button class="builder-btn primary" id="builderSaveBtn" onclick="saveCustomWOD()" disabled>SAVE WOD</button>
     </div>
   </div>
 </div>
@@ -1820,7 +2101,8 @@ const MOBILITY = [
   }
 ];
 
-const ALL_SESSIONS = [...WODS, ...WODS_EXTRA, ...MOBILITY];
+let customWODs = JSON.parse(localStorage.getItem('recompCustomWODs') || '[]');
+let ALL_SESSIONS = [...WODS, ...WODS_EXTRA, ...MOBILITY, ...customWODs];
 
 const SCHEDULE = [
   { day: 'MON', wod: 1, type: 'wod' },
@@ -1847,7 +2129,7 @@ let currentRound = 1;
 let sessionStartTime = null;
 let totalElapsed = 0;
 
-const defaultSettings = { work: 60, rest: 15, roundRest: 60, rounds: 4, sound: true };
+const defaultSettings = { work: 60, rest: 15, roundRest: 60, rounds: 4, sound: true, vibration: true, theme: 'dark' };
 let settings = { ...defaultSettings, ...JSON.parse(localStorage.getItem('recompSettings') || '{}') };
 workoutMode = localStorage.getItem('recompMode') || 'circuit';
 
@@ -1888,9 +2170,13 @@ function beep(freq = 880, duration = 0.1, vol = 0.3) {
   } catch(e) {}
 }
 
-function tripleBeep() { beep(1200, 0.08); setTimeout(() => beep(1200, 0.08), 120); setTimeout(() => beep(1600, 0.15), 240); }
-function restBeep() { beep(600, 0.15); }
-function countdownBeep() { beep(440, 0.06, 0.15); }
+function vibrate(pattern) {
+  if (settings.vibration && navigator.vibrate) navigator.vibrate(pattern);
+}
+
+function tripleBeep() { beep(1200, 0.08); setTimeout(() => beep(1200, 0.08), 120); setTimeout(() => beep(1600, 0.15), 240); vibrate([100, 80, 100, 80, 200]); }
+function restBeep() { beep(600, 0.15); vibrate(150); }
+function countdownBeep() { beep(440, 0.06, 0.15); vibrate(50); }
 
 // ═══════════════════════════════
 // INIT
@@ -1918,6 +2204,8 @@ function init() {
   // Restore persisted preferences
   document.getElementById('nameInput').value = userName;
   document.getElementById('soundToggle').textContent = settings.sound ? '🔊 ON' : '🔇 OFF';
+  document.getElementById('vibrationToggle').textContent = settings.vibration ? '📳 ON' : '📳 OFF';
+  applyTheme();
   setMode(workoutMode);
 }
 
@@ -1930,10 +2218,24 @@ function filterCat(cat, el) {
   renderAllSessions();
 }
 
+const REST_DAY_TIPS = [
+  'Try a 10-min walk — low-intensity movement helps recovery more than sitting still.',
+  'Foam roll your quads and IT band for 5 minutes. Your legs will thank you tomorrow.',
+  'Do 3 sets of 60s dead hangs — decompresses the spine after heavy lifting days.',
+  'Hip 90/90 switches for 2 minutes. Best bang-for-buck hip mobility drill there is.',
+  'Practice deep belly breathing: 4s inhale, 8s exhale, 10 reps. Activates parasympathetic recovery.',
+  'Prying goblet squats with a light KB — 3 sets of 30s. Opens ankles, hips, and adductors.',
+  'Cat-cow to child\'s pose flow for 3 minutes. Resets the lower back after deadlift days.',
+  'Cold shower for 2 minutes. Reduces inflammation and builds mental toughness.',
+  'World\'s Greatest Stretch — 5 reps each side. Hits everything from ankles to thoracic spine.',
+  'Couch stretch 60s each side. Undoes the hip flexor tightness from sitting all day.'
+];
+
 function renderSchedule() {
   const today = new Date().getDay();
   const dayMap = [6, 0, 1, 2, 3, 4, 5];
   const todayIdx = dayMap[today];
+  const todaySchedule = SCHEDULE[todayIdx];
 
   document.getElementById('scheduleRow').innerHTML = SCHEDULE.map((s, i) => {
     const isToday = i === todayIdx;
@@ -1954,6 +2256,16 @@ function renderSchedule() {
         <div class="day-wod" style="color:${color}">${label}</div>
       </div>`;
   }).join('');
+
+  // Rest-day / mobility-day tip
+  const tipEl = document.getElementById('restDayTip');
+  if (todaySchedule && todaySchedule.type === 'mobility') {
+    const tip = REST_DAY_TIPS[Math.floor(Math.random() * REST_DAY_TIPS.length)];
+    tipEl.innerHTML = `<strong>RECOVERY TIP</strong> &mdash; ${tip}`;
+    tipEl.classList.add('show');
+  } else {
+    tipEl.classList.remove('show');
+  }
 }
 
 function renderAllSessions() {
@@ -1961,7 +2273,7 @@ function renderAllSessions() {
   let sessions = [];
 
   if (activeFilter === 'all') {
-    sessions = [...WODS, ...WODS_EXTRA, ...MOBILITY];
+    sessions = [...WODS, ...WODS_EXTRA, ...MOBILITY, ...customWODs];
   } else if (activeFilter === 'wod') {
     sessions = [...WODS];
   } else if (activeFilter === 'extra') {
@@ -1970,10 +2282,13 @@ function renderAllSessions() {
     sessions = [...MOBILITY];
   } else if (activeFilter === 'deload') {
     sessions = WODS_EXTRA.filter(w => w.type === 'deload');
+  } else if (activeFilter === 'custom') {
+    sessions = [...customWODs];
   }
 
   grid.innerHTML = sessions.map(s => {
     if (s.type === 'mobility') return renderMobilityCard(s);
+    if (s.type === 'custom') return renderCustomCard(s);
     return renderWodCard(s);
   }).join('');
 }
@@ -2010,6 +2325,22 @@ function renderMobilityCard(m) {
       </div>
       <div class="wod-card-actions">
         <button class="wod-quick-start" onclick="quickStart('${m.id}', event)">▶ GO</button>
+      </div>
+    </div>`;
+}
+
+function renderCustomCard(w) {
+  return `
+    <div class="wod-card" id="card-${w.id}" style="--card-color:${w.color}" onclick="selectSession('${w.id}')">
+      <div class="wod-tag">CUSTOM</div>
+      <div class="wod-name">${w.name}</div>
+      <div class="wod-focus">${w.focus}</div>
+      <div class="wod-movements">
+        ${w.movements.map(m => `<div class="wod-movement-item">${m.name}</div>`).join('')}
+      </div>
+      <div class="wod-card-actions">
+        <button class="wod-quick-start" onclick="quickStart('${w.id}', event)">▶ GO</button>
+        <button class="wod-quick-start" style="background:var(--accent2);" onclick="deleteCustomWOD('${w.id}', event)">✕</button>
       </div>
     </div>`;
 }
@@ -2607,6 +2938,61 @@ function saveAndClose() {
 // ═══════════════════════════════
 // LOG
 // ═══════════════════════════════
+function renderHistoryChart() {
+  const chart = document.getElementById('historyChart');
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Build 4 weeks of data (current week + 3 prior)
+  const weeks = [];
+  const dayOfWeek = (today.getDay() + 6) % 7; // Mon=0
+  const thisMonday = new Date(today);
+  thisMonday.setDate(today.getDate() - dayOfWeek);
+
+  // Collect log dates as a Set for fast lookup
+  const logDates = new Set(workoutLog.map(e => e.date));
+
+  for (let w = 3; w >= 0; w--) {
+    const weekStart = new Date(thisMonday);
+    weekStart.setDate(thisMonday.getDate() - w * 7);
+    const days = [];
+    let count = 0;
+    for (let d = 0; d < 7; d++) {
+      const date = new Date(weekStart);
+      date.setDate(weekStart.getDate() + d);
+      const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const isActive = logDates.has(dateStr);
+      const isToday = date.getTime() === today.getTime();
+      if (isActive) count++;
+      days.push({ isActive, isToday, date });
+    }
+
+    const label = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    weeks.push({ label, days, count });
+  }
+
+  const maxCount = Math.max(...weeks.map(w => w.count), 1);
+
+  chart.innerHTML = `
+    <div class="history-chart-title">LAST 4 WEEKS</div>
+    <div class="history-weeks">
+      ${weeks.map(w => `
+        <div class="history-week">
+          <div class="history-days">
+            ${w.days.map(d => `<div class="history-day${d.isActive ? ' active' : ''}${d.isToday ? ' today' : ''}"></div>`).join('')}
+          </div>
+          <div class="history-week-label">${w.label}</div>
+        </div>`).join('')}
+    </div>
+    <div class="history-bar-row">
+      ${weeks.map(w => `
+        <div class="history-bar-col">
+          <div class="history-bar" style="height:${Math.round((w.count / maxCount) * 48)}px"></div>
+          <div class="history-bar-label">${w.count}</div>
+        </div>`).join('')}
+    </div>`;
+}
+
 function renderLog() {
   const list = document.getElementById('logList');
 
@@ -2638,6 +3024,7 @@ function renderLog() {
   document.getElementById('statTime').textContent = totalMin > 0 ? `${totalMin}m` : '0m';
   document.getElementById('statStreak').textContent = streak;
   document.getElementById('statFave').textContent = fave ? `W${fave}` : '—';
+  renderHistoryChart();
 }
 
 function calcStreak() {
@@ -2692,6 +3079,36 @@ function toggleSound() {
   settings.sound = !settings.sound;
   document.getElementById('soundToggle').textContent = settings.sound ? '🔊 ON' : '🔇 OFF';
   saveUserPrefs();
+}
+
+function toggleVibration() {
+  settings.vibration = !settings.vibration;
+  document.getElementById('vibrationToggle').textContent = settings.vibration ? '📳 ON' : '📳 OFF';
+  if (settings.vibration && navigator.vibrate) navigator.vibrate(100);
+  saveUserPrefs();
+}
+
+function toggleTheme() {
+  settings.theme = settings.theme === 'amoled' ? 'dark' : 'amoled';
+  applyTheme();
+  saveUserPrefs();
+}
+
+function applyTheme() {
+  const root = document.documentElement;
+  if (settings.theme === 'amoled') {
+    root.style.setProperty('--bg', '#000000');
+    root.style.setProperty('--surface', '#0a0a0a');
+    root.style.setProperty('--surface2', '#111111');
+    root.style.setProperty('--border', '#1a1a1a');
+    document.getElementById('themeToggle').textContent = 'AMOLED';
+  } else {
+    root.style.setProperty('--bg', '#0a0a0a');
+    root.style.setProperty('--surface', '#111111');
+    root.style.setProperty('--surface2', '#1a1a1a');
+    root.style.setProperty('--border', '#222222');
+    document.getElementById('themeToggle').textContent = 'DARK';
+  }
 }
 
 // ═══════════════════════════════
@@ -2864,9 +3281,111 @@ function closeFinisherTimer() {
 }
 
 // ═══════════════════════════════
+// CUSTOM WOD BUILDER
+// ═══════════════════════════════
+let builderPicks = [];
+
+function buildMovementPool() {
+  const pool = [];
+  const seen = new Set();
+  [...WODS, ...WODS_EXTRA].forEach(wod => {
+    wod.movements.forEach(mv => {
+      if (!seen.has(mv.name)) {
+        seen.add(mv.name);
+        pool.push(mv);
+      }
+    });
+  });
+  return pool.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function openBuilder() {
+  builderPicks = [];
+  document.getElementById('builderName').value = '';
+  renderBuilderUI();
+  document.getElementById('builderOverlay').classList.add('show');
+}
+
+function closeBuilder() {
+  document.getElementById('builderOverlay').classList.remove('show');
+}
+
+function renderBuilderUI() {
+  const pool = buildMovementPool();
+  const pickedNames = new Set(builderPicks.map(m => m.name));
+
+  document.getElementById('builderCount').textContent = builderPicks.length;
+  document.getElementById('builderSaveBtn').disabled = builderPicks.length === 0;
+
+  document.getElementById('builderSelected').innerHTML = builderPicks.map((mv, i) =>
+    `<span class="builder-tag" onclick="removeBuilderPick(${i})">${mv.name} ✕</span>`
+  ).join('') || '<span style="color:var(--muted);font-family:DM Mono,monospace;font-size:11px;">Tap movements below to add them</span>';
+
+  document.getElementById('builderPool').innerHTML = pool.map(mv =>
+    `<div class="builder-mv${pickedNames.has(mv.name) ? ' picked' : ''}" onclick="addBuilderPick('${mv.name.replace(/'/g, "\\'")}')">
+      ${mv.name}
+      <div class="builder-mv-equip">${mv.equip}</div>
+    </div>`
+  ).join('');
+}
+
+function addBuilderPick(name) {
+  if (builderPicks.length >= 6) return;
+  const pool = buildMovementPool();
+  const mv = pool.find(m => m.name === name);
+  if (mv && !builderPicks.some(p => p.name === name)) {
+    builderPicks.push(mv);
+    renderBuilderUI();
+  }
+}
+
+function removeBuilderPick(idx) {
+  builderPicks.splice(idx, 1);
+  renderBuilderUI();
+}
+
+function saveCustomWOD() {
+  if (builderPicks.length === 0) return;
+  const name = document.getElementById('builderName').value.trim() || `Custom WOD ${customWODs.length + 1}`;
+  const id = `custom_${Date.now()}`;
+  const wod = {
+    id,
+    name: `"${name}"`,
+    tag: 'CUSTOM',
+    type: 'custom',
+    focus: `${builderPicks.length} movements — custom build`,
+    color: '#3affa0',
+    day: 'ANY',
+    movements: builderPicks.map(mv => ({ ...mv }))
+  };
+
+  customWODs.push(wod);
+  ALL_SESSIONS = [...WODS, ...WODS_EXTRA, ...MOBILITY, ...customWODs];
+  localStorage.setItem('recompCustomWODs', JSON.stringify(customWODs));
+
+  closeBuilder();
+  renderAllSessions();
+}
+
+function deleteCustomWOD(id, e) {
+  e.stopPropagation();
+  customWODs = customWODs.filter(w => w.id !== id);
+  ALL_SESSIONS = [...WODS, ...WODS_EXTRA, ...MOBILITY, ...customWODs];
+  localStorage.setItem('recompCustomWODs', JSON.stringify(customWODs));
+  renderAllSessions();
+}
+
+// ═══════════════════════════════
 // BOOT
 // ═══════════════════════════════
 init();
+
+// ═══════════════════════════════
+// SERVICE WORKER
+// ═══════════════════════════════
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
 </script>
 </body>
 </html>
