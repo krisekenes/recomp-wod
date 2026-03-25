@@ -618,6 +618,22 @@
     width: 55px;
   }
 
+  .finisher-go-btn {
+    margin-top: 12px;
+    background: var(--accent2);
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .finisher-go-btn:hover { opacity: 0.85; }
+
   /* ── QUICK START on WOD card ── */
   .wod-card-actions {
     display: flex;
@@ -1338,7 +1354,7 @@
 
   <div class="finisher-section">
     <div class="finisher-title">BURN-IT-DOWN FINISHERS</div>
-    <div class="finisher-sub">3-minute post-WOD intensifiers — choose one to tack on at the end</div>
+    <div class="finisher-sub">3-minute burners — add to a WOD or run standalone</div>
     <div class="finisher-cards" id="finisherCards"></div>
   </div>
 </div>
@@ -2010,6 +2026,7 @@ function renderFinishers() {
             <span>${s.ex}</span>
           </div>`).join('')}
       </div>
+      <button class="finisher-go-btn" onclick="quickStartFinisher(${idx}, event)">▶ GO</button>
     </div>`).join('');
 }
 
@@ -2759,6 +2776,14 @@ let finisherInterval = null;
 let finisherRunning = false;
 let finisherTimeLeft = 180; // 3 minutes
 let finisherTotal = 180;
+
+function quickStartFinisher(idx, e) {
+  e.stopPropagation();
+  selectedFinisher = idx;
+  document.querySelectorAll('.finisher-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById(`finisher-${idx}`).classList.add('selected');
+  launchFinisherTimer();
+}
 
 function launchFinisherTimer() {
   if (selectedFinisher === null) return;
