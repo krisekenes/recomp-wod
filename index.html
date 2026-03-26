@@ -1564,6 +1564,121 @@
   .builder-btn.primary:disabled { opacity: 0.3; cursor: default; }
   .builder-btn.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
 
+  /* ── EXERCISE DEMO ── */
+  .ex-demo-wrap {
+    margin: 12px 0;
+    display: none;
+  }
+  .ex-demo-wrap.show { display: block; }
+
+  .ex-demo-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--accent3);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .ex-demo-btn:hover { border-color: var(--accent3); }
+
+  .ex-demo-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 250;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    backdrop-filter: blur(12px);
+  }
+  .ex-demo-modal.show { opacity: 1; pointer-events: all; }
+
+  .ex-demo-card {
+    background: var(--surface);
+    border: 1px solid var(--accent3);
+    border-radius: 20px;
+    padding: 24px;
+    max-width: 420px;
+    width: 94%;
+    text-align: center;
+    box-shadow: 0 0 60px rgba(58,223,255,0.1);
+  }
+
+  .ex-demo-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+
+  .ex-demo-equip {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted2);
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+
+  .ex-demo-img-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: var(--surface2);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .ex-demo-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    position: absolute;
+    inset: 0;
+    transition: opacity 0.15s;
+  }
+
+  .ex-demo-img-wrap img.hidden { opacity: 0; }
+
+  .ex-demo-no-img {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .ex-demo-cue {
+    font-size: 12px;
+    color: var(--muted2);
+    line-height: 1.6;
+    text-align: left;
+    margin-bottom: 16px;
+  }
+
+  .ex-demo-close {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .ex-demo-close:hover { border-color: var(--accent3); }
+
   /* ── RESPONSIVE ── */
   @media (max-width: 600px) {
     header { padding: 16px; }
@@ -1686,12 +1801,9 @@
         <div class="current-ex-label">CURRENT MOVEMENT</div>
         <div class="current-ex-name" id="exName">—</div>
 
-        <!-- TODO: Exercise GIF/image panel — follow-up task
-             Plan: two-frame flip from yuhonas/free-exercise-db (public domain)
-             Base URL: https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/{folder}/0.jpg
-             Each exercise has 0.jpg + 1.jpg — alternate on ~900ms interval to simulate animation.
-             EXERCISE_IMAGES map already drafted in CONTEXT.md.
-             Skipped today to ship a stable build. -->
+        <div class="ex-demo-wrap" id="exDemoWrap">
+          <button class="ex-demo-btn" onclick="openExDemo()">? HOW TO DO THIS</button>
+        </div>
 
         <div class="current-ex-cue" id="exCue">Select a WOD and hit start.</div>
         <div class="breathing-cue" id="beatBook"></div>
@@ -1851,6 +1963,17 @@
 <!-- Sticky Start Bar -->
 <div class="start-bar" id="startBar">
   <button class="start-btn" id="startBtn" onclick="goToTimer()">SELECT A WOD TO BEGIN</button>
+</div>
+
+<!-- Exercise Demo Modal -->
+<div class="ex-demo-modal" id="exDemoModal" onclick="closeExDemo(event)">
+  <div class="ex-demo-card" onclick="event.stopPropagation()">
+    <div class="ex-demo-title" id="exDemoTitle"></div>
+    <div class="ex-demo-equip" id="exDemoEquip"></div>
+    <div class="ex-demo-img-wrap" id="exDemoImgWrap"></div>
+    <div class="ex-demo-cue" id="exDemoCue"></div>
+    <button class="ex-demo-close" onclick="closeExDemo()">CLOSE</button>
+  </div>
 </div>
 
 <!-- Custom WOD Builder Overlay -->
@@ -2700,7 +2823,9 @@ function updateMovementDisplay() {
   const mv = selectedWOD.movements[currentMovement];
   document.getElementById('exName').textContent = mv.name;
   document.getElementById('exCue').textContent = mv.cue;
-  // TODO: loadExerciseImages(mv.name) — wire in when image follow-up is implemented
+
+  // Show demo button
+  document.getElementById('exDemoWrap').classList.add('show');
 
   // Show breathing cue for mobility sessions
   const beatEl = document.getElementById('beatBook');
@@ -3307,6 +3432,99 @@ function closeFinisherTimer() {
   document.getElementById('finisherOverlay').classList.remove('show');
   document.getElementById('finisherBigTime').classList.remove('last');
   showView('select');
+}
+
+// ═══════════════════════════════
+// EXERCISE DEMO IMAGES
+// ═══════════════════════════════
+const IMG_BASE = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises';
+
+const EXERCISE_IMAGES = {
+  'Barbell Back Squats': 'Barbell_Squat',
+  'Kettlebell Swings': 'One-Arm_Kettlebell_Swings',
+  'Dumbbell Reverse Lunges': 'Dumbbell_Rear_Lunge',
+  'Barbell Romanian Deadlifts': 'Romanian_Deadlift',
+  'Kettlebell Goblet Squats': 'Goblet_Squat',
+  'Jump Squats': 'Freehand_Jump_Squat',
+  'Barbell Overhead Press': 'Standing_Military_Press',
+  'Dumbbell Renegade Rows': 'Alternating_Renegade_Row',
+  'Kettlebell Clean & Press': 'Clean_and_Press',
+  'Barbell Bent-Over Rows': 'Bent_Over_Barbell_Row',
+  'Dumbbell Floor Press': 'Floor_Press',
+  'Weighted Russian Twists': 'Russian_Twist',
+  'Barbell Deadlifts': 'Barbell_Deadlift',
+  'Dumbbell Stiff-Leg Deadlifts': 'Stiff-Legged_Dumbbell_Deadlift',
+  'Barbell Glute Bridges': 'Barbell_Glute_Bridge',
+  'Barbell Thrusters': 'Kettlebell_Thruster',
+  'Barbell Power Cleans': 'Power_Clean',
+  'DB Weighted Step-ups': 'Dumbbell_Step_Ups',
+  'Barbell Front Squats': 'Front_Barbell_Squat',
+  'KB Single-Arm Snatch': 'Snatch',
+  'Barbell Upright Rows': 'Upright_Barbell_Row',
+  'Single-Leg Romanian Deadlift': 'Stiff-Legged_Dumbbell_Deadlift',
+  'Bulgarian Split Squats': 'Split_Squat_with_Dumbbells',
+  'Single-Arm KB Row': 'One-Arm_Kettlebell_Row',
+  'Pistol Squat Progression': 'Kettlebell_Pistol_Squat',
+  'Single-Arm KB Press': 'Alternating_Kettlebell_Press',
+  'Pull-Up Negatives': 'Pullups',
+  'Barbell Good Mornings': 'Good_Morning',
+  'DB Farmer\'s Carry': 'Farmers_Walk',
+  'Glute Bridge (Bodyweight)': 'Butt_Lift_Bridge',
+  '90/90 Hip Switches': '90_90_Hamstring',
+  'Prying Goblet Squat': 'Goblet_Squat',
+  'Cat-Cow to Child\'s Pose': 'Cat_Stretch',
+  'Couch Stretch': 'Quad_Stretch',
+  'Doorway Chest Stretch': 'Behind_Head_Chest_Stretch',
+  'Mountain Climbers': 'Mountain_Climbers',
+  'Push-Ups': 'Pushups',
+  'Deadbugs': 'Dead_Bug',
+  'Superman Holds': 'Superman',
+  'KB American Swings': 'One-Arm_Kettlebell_Swings',
+  'Dumbbell Goblet Lunges': 'Dumbbell_Lunges',
+  'Dead Hang': 'Chin-Up',
+};
+
+let demoInterval = null;
+
+function openExDemo() {
+  if (!selectedWOD) return;
+  const mv = selectedWOD.movements[currentMovement];
+  if (!mv) return;
+
+  document.getElementById('exDemoTitle').textContent = mv.name;
+  document.getElementById('exDemoEquip').textContent = mv.equip;
+  document.getElementById('exDemoCue').textContent = mv.cue;
+
+  const folder = EXERCISE_IMAGES[mv.name];
+  const wrap = document.getElementById('exDemoImgWrap');
+
+  if (folder) {
+    const url0 = `${IMG_BASE}/${folder}/0.jpg`;
+    const url1 = `${IMG_BASE}/${folder}/1.jpg`;
+    wrap.innerHTML = `<img id="demoFrame0" src="${url0}" alt="${mv.name} start"><img id="demoFrame1" src="${url1}" alt="${mv.name} end" class="hidden">`;
+
+    // Animate between the two frames
+    let showFirst = true;
+    clearInterval(demoInterval);
+    demoInterval = setInterval(() => {
+      showFirst = !showFirst;
+      const f0 = document.getElementById('demoFrame0');
+      const f1 = document.getElementById('demoFrame1');
+      if (f0) f0.classList.toggle('hidden', !showFirst);
+      if (f1) f1.classList.toggle('hidden', showFirst);
+    }, 900);
+  } else {
+    wrap.innerHTML = '<div class="ex-demo-no-img">No demo image available — follow the cue below</div>';
+    clearInterval(demoInterval);
+  }
+
+  document.getElementById('exDemoModal').classList.add('show');
+}
+
+function closeExDemo(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('exDemoModal').classList.remove('show');
+  clearInterval(demoInterval);
 }
 
 // ═══════════════════════════════
