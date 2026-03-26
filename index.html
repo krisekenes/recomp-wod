@@ -2012,6 +2012,15 @@
         <input class="setting-input" id="nameInput" type="text" placeholder="Enter name" maxlength="20" onchange="saveUserName(this.value)" oninput="saveUserName(this.value)">
       </div>
     </div>
+    <div class="setting-row">
+      <div><div class="setting-label">WEIGHT STANDARD</div><div class="setting-desc">Adjusts prescribed weights</div></div>
+      <div class="setting-control">
+        <div class="mode-toggle" style="margin:0;">
+          <button class="mode-btn" id="genderM" onclick="setGender('m')">MEN</button>
+          <button class="mode-btn" id="genderW" onclick="setGender('w')">WOMEN</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <p class="section-title">TIMER SETTINGS</p>
@@ -2208,11 +2217,11 @@ const WODS = [
     color: '#e8ff3a',
     day: 'MON',
     movements: [
-      { name: 'Barbell Back Squats', equip: 'BARBELL', cue: '1.5 Rep method: All the way down, halfway up, back down, then stand. Brutal on the quads.', reps: '8-10', rx: '135lb / 61kg', scaled: '95lb / 43kg', light: '65lb / 29kg' },
-      { name: 'Kettlebell Swings', equip: 'KETTLEBELL', cue: 'Power focus — snap the hips aggressively. Drive from the posterior chain, not the arms.', reps: '15-20', rx: '53lb / 24kg', scaled: '35lb / 16kg', light: '26lb / 12kg' },
-      { name: 'Dumbbell Reverse Lunges', equip: 'DUMBBELLS', cue: 'Alternate legs. Keep torso upright for quad focus. Step back far enough for 90° knee angle.', reps: '10 each', rx: '40lb / 18kg ea', scaled: '25lb / 11kg ea', light: '15lb / 7kg ea' },
-      { name: 'Barbell Romanian Deadlifts', equip: 'BARBELL', cue: 'Slow eccentric (3 seconds down). Feel the stretch in hamstrings and glutes before driving up.', reps: '10-12', rx: '135lb / 61kg', scaled: '95lb / 43kg', light: '65lb / 29kg' },
-      { name: 'Kettlebell Goblet Squats', equip: 'KETTLEBELL', cue: 'Hold at chest level. Pause 1 full second at the bottom — don\'t bounce out.', reps: '12-15', rx: '53lb / 24kg', scaled: '35lb / 16kg', light: '26lb / 12kg' },
+      { name: 'Barbell Back Squats', equip: 'BARBELL', cue: '1.5 Rep method: All the way down, halfway up, back down, then stand. Brutal on the quads.', reps: '8-10', rx: { m: '135lb / 61kg', w: '95lb / 43kg' }, scaled: { m: '95lb / 43kg', w: '65lb / 29kg' }, light: { m: '65lb / 29kg', w: '45lb / 20kg' } },
+      { name: 'Kettlebell Swings', equip: 'KETTLEBELL', cue: 'Power focus — snap the hips aggressively. Drive from the posterior chain, not the arms.', reps: '15-20', rx: { m: '53lb / 24kg', w: '35lb / 16kg' }, scaled: { m: '35lb / 16kg', w: '26lb / 12kg' }, light: { m: '26lb / 12kg', w: '18lb / 8kg' } },
+      { name: 'Dumbbell Reverse Lunges', equip: 'DUMBBELLS', cue: 'Alternate legs. Keep torso upright for quad focus. Step back far enough for 90° knee angle.', reps: '10 each', rx: { m: '40lb / 18kg ea', w: '25lb / 11kg ea' }, scaled: { m: '25lb / 11kg ea', w: '15lb / 7kg ea' }, light: { m: '15lb / 7kg ea', w: '10lb / 5kg ea' } },
+      { name: 'Barbell Romanian Deadlifts', equip: 'BARBELL', cue: 'Slow eccentric (3 seconds down). Feel the stretch in hamstrings and glutes before driving up.', reps: '10-12', rx: { m: '135lb / 61kg', w: '95lb / 43kg' }, scaled: { m: '95lb / 43kg', w: '65lb / 29kg' }, light: { m: '65lb / 29kg', w: '45lb / 20kg' } },
+      { name: 'Kettlebell Goblet Squats', equip: 'KETTLEBELL', cue: 'Hold at chest level. Pause 1 full second at the bottom — don\'t bounce out.', reps: '12-15', rx: { m: '53lb / 24kg', w: '35lb / 16kg' }, scaled: { m: '35lb / 16kg', w: '26lb / 12kg' }, light: { m: '26lb / 12kg', w: '18lb / 8kg' } },
       { name: 'Jump Squats', equip: 'BODYWEIGHT', cue: 'Max height every rep. Land softly, absorb through hips. This spikes the heart rate for fat burn.', reps: 'Max reps' }
     ]
   },
@@ -2224,12 +2233,12 @@ const WODS = [
     color: '#3adfff',
     day: 'TUE',
     movements: [
-      { name: 'Barbell Overhead Press', equip: 'BARBELL', cue: 'Strict — no leg drive. Core tight, ribs down. Press through the ceiling, lower controlled.', reps: '8-10', rx: '95lb / 43kg', scaled: '75lb / 34kg', light: '55lb / 25kg' },
-      { name: 'Dumbbell Renegade Rows', equip: 'DUMBBELLS', cue: 'Push-up → Row Left → Row Right = 1 rep. Keep hips square. Anti-rotation core challenge.', reps: '6-8', rx: '35lb / 16kg ea', scaled: '25lb / 11kg ea', light: '15lb / 7kg ea' },
-      { name: 'Kettlebell Clean & Press', equip: 'KETTLEBELL', cue: 'Alternate arms each rep. Catch in the rack position cleanly before pressing overhead.', reps: '8 each', rx: '44lb / 20kg', scaled: '35lb / 16kg', light: '26lb / 12kg' },
-      { name: 'Barbell Bent-Over Rows', equip: 'BARBELL', cue: 'Underhand supinated grip to engage lats and biceps. Pull to the lower chest. Flat back throughout.', reps: '10-12', rx: '115lb / 52kg', scaled: '85lb / 39kg', light: '65lb / 29kg' },
-      { name: 'Dumbbell Floor Press', equip: 'DUMBBELLS', cue: 'Chest focus. Pause briefly when elbows touch the floor — eliminates momentum, maximizes tension.', reps: '10-12', rx: '40lb / 18kg ea', scaled: '30lb / 14kg ea', light: '20lb / 9kg ea' },
-      { name: 'Weighted Russian Twists', equip: 'KETTLEBELL', cue: 'Use a light KB. Touch the floor on each side. Lean back 45° and keep feet elevated.', reps: '20 total', rx: '26lb / 12kg', scaled: '18lb / 8kg', light: '10lb / 5kg' }
+      { name: 'Barbell Overhead Press', equip: 'BARBELL', cue: 'Strict — no leg drive. Core tight, ribs down. Press through the ceiling, lower controlled.', reps: '8-10', rx: { m: '95lb / 43kg', w: '65lb / 29kg' }, scaled: { m: '75lb / 34kg', w: '55lb / 25kg' }, light: { m: '55lb / 25kg', w: '35lb / 16kg' } },
+      { name: 'Dumbbell Renegade Rows', equip: 'DUMBBELLS', cue: 'Push-up → Row Left → Row Right = 1 rep. Keep hips square. Anti-rotation core challenge.', reps: '6-8', rx: { m: '35lb / 16kg ea', w: '25lb / 11kg ea' }, scaled: { m: '25lb / 11kg ea', w: '15lb / 7kg ea' }, light: { m: '15lb / 7kg ea', w: '10lb / 5kg ea' } },
+      { name: 'Kettlebell Clean & Press', equip: 'KETTLEBELL', cue: 'Alternate arms each rep. Catch in the rack position cleanly before pressing overhead.', reps: '8 each', rx: { m: '44lb / 20kg', w: '26lb / 12kg' }, scaled: { m: '35lb / 16kg', w: '26lb / 12kg' }, light: { m: '26lb / 12kg', w: '18lb / 8kg' } },
+      { name: 'Barbell Bent-Over Rows', equip: 'BARBELL', cue: 'Underhand supinated grip to engage lats and biceps. Pull to the lower chest. Flat back throughout.', reps: '10-12', rx: { m: '115lb / 52kg', w: '75lb / 34kg' }, scaled: { m: '85lb / 39kg', w: '55lb / 25kg' }, light: { m: '65lb / 29kg', w: '45lb / 20kg' } },
+      { name: 'Dumbbell Floor Press', equip: 'DUMBBELLS', cue: 'Chest focus. Pause briefly when elbows touch the floor — eliminates momentum, maximizes tension.', reps: '10-12', rx: { m: '40lb / 18kg ea', w: '25lb / 11kg ea' }, scaled: { m: '30lb / 14kg ea', w: '20lb / 9kg ea' }, light: { m: '20lb / 9kg ea', w: '12lb / 5kg ea' } },
+      { name: 'Weighted Russian Twists', equip: 'KETTLEBELL', cue: 'Use a light KB. Touch the floor on each side. Lean back 45° and keep feet elevated.', reps: '20 total', rx: { m: '26lb / 12kg', w: '18lb / 8kg' }, scaled: { m: '18lb / 8kg', w: '12lb / 5kg' }, light: { m: '10lb / 5kg', w: '8lb / 4kg' } }
     ]
   },
   {
@@ -2240,11 +2249,11 @@ const WODS = [
     color: '#ff9f3a',
     day: 'WED',
     movements: [
-      { name: 'Barbell Deadlifts', equip: 'BARBELL', cue: 'Standard grip. Reset with a flat back each rep. Don\'t round the lumbar. Brace hard before each pull.', reps: '6-8', rx: '185lb / 84kg', scaled: '135lb / 61kg', light: '95lb / 43kg' },
-      { name: 'KB Suitcase Carry', equip: 'KETTLEBELL', cue: 'Heavy KB in LEFT hand. Walk perfectly vertical — don\'t let it pull your shoulder. Switch hands next round.', reps: '40yd / 36m', rx: '53lb / 24kg', scaled: '35lb / 16kg', light: '26lb / 12kg' },
-      { name: 'Dumbbell Stiff-Leg Deadlifts', equip: 'DUMBBELLS', cue: 'Slight knee bend. Hinge at the hip, feel the hamstring stretch. Squeeze glutes aggressively at the top.', reps: '10-12', rx: '40lb / 18kg ea', scaled: '30lb / 14kg ea', light: '20lb / 9kg ea' },
-      { name: 'KB Goblet Lateral Lunges', equip: 'KETTLEBELL', cue: 'Alternate sides. Stay low in the transition — don\'t stand fully between reps. Hit the inner thigh.', reps: '8 each', rx: '44lb / 20kg', scaled: '35lb / 16kg', light: '26lb / 12kg' },
-      { name: 'Barbell Glute Bridges', equip: 'BARBELL', cue: 'Bar on hips (use a pad). Squeeze glutes hard at the top and hold 1 second. Drive through the heels.', reps: '12-15', rx: '155lb / 70kg', scaled: '115lb / 52kg', light: '75lb / 34kg' },
+      { name: 'Barbell Deadlifts', equip: 'BARBELL', cue: 'Standard grip. Reset with a flat back each rep. Don\'t round the lumbar. Brace hard before each pull.', reps: '6-8', rx: { m: '185lb / 84kg', w: '125lb / 57kg' }, scaled: { m: '135lb / 61kg', w: '95lb / 43kg' }, light: { m: '95lb / 43kg', w: '65lb / 29kg' } },
+      { name: 'KB Suitcase Carry', equip: 'KETTLEBELL', cue: 'Heavy KB in LEFT hand. Walk perfectly vertical — don\'t let it pull your shoulder. Switch hands next round.', reps: '40yd / 36m', rx: { m: '53lb / 24kg', w: '35lb / 16kg' }, scaled: { m: '35lb / 16kg', w: '26lb / 12kg' }, light: { m: '26lb / 12kg', w: '18lb / 8kg' } },
+      { name: 'Dumbbell Stiff-Leg Deadlifts', equip: 'DUMBBELLS', cue: 'Slight knee bend. Hinge at the hip, feel the hamstring stretch. Squeeze glutes aggressively at the top.', reps: '10-12', rx: { m: '40lb / 18kg ea', w: '25lb / 11kg ea' }, scaled: { m: '30lb / 14kg ea', w: '20lb / 9kg ea' }, light: { m: '20lb / 9kg ea', w: '12lb / 5kg ea' } },
+      { name: 'KB Goblet Lateral Lunges', equip: 'KETTLEBELL', cue: 'Alternate sides. Stay low in the transition — don\'t stand fully between reps. Hit the inner thigh.', reps: '8 each', rx: { m: '44lb / 20kg', w: '26lb / 12kg' }, scaled: { m: '35lb / 16kg', w: '26lb / 12kg' }, light: { m: '26lb / 12kg', w: '18lb / 8kg' } },
+      { name: 'Barbell Glute Bridges', equip: 'BARBELL', cue: 'Bar on hips (use a pad). Squeeze glutes hard at the top and hold 1 second. Drive through the heels.', reps: '12-15', rx: { m: '155lb / 70kg', w: '105lb / 48kg' }, scaled: { m: '115lb / 52kg', w: '75lb / 34kg' }, light: { m: '75lb / 34kg', w: '55lb / 25kg' } },
       { name: 'Hollow Body Hold', equip: 'BODYWEIGHT', cue: 'Lower back PRESSED into floor. Arms extended overhead, legs hovering 6 inches. Breathe and hold.', reps: 'Max hold' }
     ]
   },
@@ -2256,11 +2265,11 @@ const WODS = [
     color: '#ff5a3a',
     day: 'FRI',
     movements: [
-      { name: 'Barbell Thrusters', equip: 'BARBELL', cue: 'Squat to overhead press in one explosive motion. Use the momentum from the squat to drive the press.', reps: '10-12', rx: '95lb / 43kg', scaled: '75lb / 34kg', light: '55lb / 25kg' },
-      { name: 'Dumbbell Devil\'s Press', equip: 'DUMBBELLS', cue: 'Chest-to-floor burpee, then a double DB snatch in one motion. Full extension overhead. High intensity.', reps: '6-8', rx: '35lb / 16kg ea', scaled: '25lb / 11kg ea', light: '15lb / 7kg ea' },
-      { name: 'KB American Swings', equip: 'KETTLEBELL', cue: 'Swing the bell all the way overhead — full extension at the top. More shoulder stability than Russian swings.', reps: '15-20', rx: '53lb / 24kg', scaled: '35lb / 16kg', light: '26lb / 12kg' },
-      { name: 'Barbell Power Cleans', equip: 'BARBELL', cue: 'From floor to the front rack position. Fast hips, fast elbows. Keep the bar close to the body.', reps: '6-8', rx: '135lb / 61kg', scaled: '95lb / 43kg', light: '65lb / 29kg' },
-      { name: 'DB Weighted Step-ups', equip: 'DUMBBELLS', cue: 'Use a bench or box. Alternate legs. Drive through the heel of the elevated foot. Keep core braced.', reps: '8 each', rx: '35lb / 16kg ea', scaled: '25lb / 11kg ea', light: '15lb / 7kg ea' },
+      { name: 'Barbell Thrusters', equip: 'BARBELL', cue: 'Squat to overhead press in one explosive motion. Use the momentum from the squat to drive the press.', reps: '10-12', rx: { m: '95lb / 43kg', w: '65lb / 29kg' }, scaled: { m: '75lb / 34kg', w: '55lb / 25kg' }, light: { m: '55lb / 25kg', w: '35lb / 16kg' } },
+      { name: 'Dumbbell Devil\'s Press', equip: 'DUMBBELLS', cue: 'Chest-to-floor burpee, then a double DB snatch in one motion. Full extension overhead. High intensity.', reps: '6-8', rx: { m: '35lb / 16kg ea', w: '25lb / 11kg ea' }, scaled: { m: '25lb / 11kg ea', w: '15lb / 7kg ea' }, light: { m: '15lb / 7kg ea', w: '10lb / 5kg ea' } },
+      { name: 'KB American Swings', equip: 'KETTLEBELL', cue: 'Swing the bell all the way overhead — full extension at the top. More shoulder stability than Russian swings.', reps: '15-20', rx: { m: '53lb / 24kg', w: '35lb / 16kg' }, scaled: { m: '35lb / 16kg', w: '26lb / 12kg' }, light: { m: '26lb / 12kg', w: '18lb / 8kg' } },
+      { name: 'Barbell Power Cleans', equip: 'BARBELL', cue: 'From floor to the front rack position. Fast hips, fast elbows. Keep the bar close to the body.', reps: '6-8', rx: { m: '135lb / 61kg', w: '95lb / 43kg' }, scaled: { m: '95lb / 43kg', w: '65lb / 29kg' }, light: { m: '65lb / 29kg', w: '45lb / 20kg' } },
+      { name: 'DB Weighted Step-ups', equip: 'DUMBBELLS', cue: 'Use a bench or box. Alternate legs. Drive through the heel of the elevated foot. Keep core braced.', reps: '8 each', rx: { m: '35lb / 16kg ea', w: '25lb / 11kg ea' }, scaled: { m: '25lb / 11kg ea', w: '15lb / 7kg ea' }, light: { m: '15lb / 7kg ea', w: '10lb / 5kg ea' } },
       { name: 'Burpees Over the Bar', equip: 'BODYWEIGHT', cue: 'Chest to floor burpee, then jump laterally over your barbell. This is the heart rate spike finisher.', reps: 'Max reps' }
     ]
   },
@@ -2272,11 +2281,11 @@ const WODS = [
     color: '#b03aff',
     day: 'SAT',
     movements: [
-      { name: 'Barbell Front Squats', equip: 'BARBELL', cue: 'Elbows up, creating a shelf. Engages core significantly more than back squats. Stay upright.', reps: '8-10', rx: '115lb / 52kg', scaled: '85lb / 39kg', light: '65lb / 29kg' },
-      { name: 'Dumbbell Goblet Lunges', equip: 'DUMBBELLS', cue: 'Forward lunges — focus on pushing off the front heel to drive glute activation. Keep torso tall.', reps: '10 each', rx: '40lb / 18kg', scaled: '25lb / 11kg', light: '15lb / 7kg' },
-      { name: 'KB Single-Arm Snatch', equip: 'KETTLEBELL', cue: 'Alternate arms every 5 reps. One explosive pull from below the hip to fully overhead. Control the descent.', reps: '10 each', rx: '44lb / 20kg', scaled: '35lb / 16kg', light: '26lb / 12kg' },
-      { name: 'Barbell Upright Rows', equip: 'BARBELL', cue: 'Pull to chin level. Lead with the elbows. Focus on traps and side delts. Don\'t shrug at the top.', reps: '12-15', rx: '75lb / 34kg', scaled: '55lb / 25kg', light: '45lb / 20kg' },
-      { name: 'DB Curl to Press', equip: 'DUMBBELLS', cue: 'Bicep curl into an overhead press. Maximize time under tension throughout. Slow and controlled.', reps: '8-10', rx: '30lb / 14kg ea', scaled: '20lb / 9kg ea', light: '12lb / 5kg ea' },
+      { name: 'Barbell Front Squats', equip: 'BARBELL', cue: 'Elbows up, creating a shelf. Engages core significantly more than back squats. Stay upright.', reps: '8-10', rx: { m: '115lb / 52kg', w: '75lb / 34kg' }, scaled: { m: '85lb / 39kg', w: '55lb / 25kg' }, light: { m: '65lb / 29kg', w: '45lb / 20kg' } },
+      { name: 'Dumbbell Goblet Lunges', equip: 'DUMBBELLS', cue: 'Forward lunges — focus on pushing off the front heel to drive glute activation. Keep torso tall.', reps: '10 each', rx: { m: '40lb / 18kg', w: '25lb / 11kg' }, scaled: { m: '25lb / 11kg', w: '15lb / 7kg' }, light: { m: '15lb / 7kg', w: '10lb / 5kg' } },
+      { name: 'KB Single-Arm Snatch', equip: 'KETTLEBELL', cue: 'Alternate arms every 5 reps. One explosive pull from below the hip to fully overhead. Control the descent.', reps: '10 each', rx: { m: '44lb / 20kg', w: '26lb / 12kg' }, scaled: { m: '35lb / 16kg', w: '26lb / 12kg' }, light: { m: '26lb / 12kg', w: '18lb / 8kg' } },
+      { name: 'Barbell Upright Rows', equip: 'BARBELL', cue: 'Pull to chin level. Lead with the elbows. Focus on traps and side delts. Don\'t shrug at the top.', reps: '12-15', rx: { m: '75lb / 34kg', w: '55lb / 25kg' }, scaled: { m: '55lb / 25kg', w: '35lb / 16kg' }, light: { m: '45lb / 20kg', w: '35lb / 16kg' } },
+      { name: 'DB Curl to Press', equip: 'DUMBBELLS', cue: 'Bicep curl into an overhead press. Maximize time under tension throughout. Slow and controlled.', reps: '8-10', rx: { m: '30lb / 14kg ea', w: '20lb / 9kg ea' }, scaled: { m: '20lb / 9kg ea', w: '12lb / 5kg ea' }, light: { m: '12lb / 5kg ea', w: '8lb / 4kg ea' } },
       { name: 'Plank to Pike', equip: 'BODYWEIGHT', cue: 'From a plank, walk feet toward hands until your hips pike up, then walk back out. Targets the deep core.', reps: 'Max reps' }
     ]
   }
@@ -2367,11 +2376,11 @@ const WODS_EXTRA = [
     color: '#3affa0',
     day: 'ALT',
     movements: [
-      { name: 'Single-Leg Romanian Deadlift', equip: 'DUMBBELL', cue: 'Hold DB in opposite hand to standing leg (contralateral). Hinge until back is parallel, pause, drive through glute to stand. 30s each side.', reps: '8 each', rx: '35lb / 16kg', scaled: '25lb / 11kg', light: '15lb / 7kg' },
-      { name: 'Bulgarian Split Squats', equip: 'DUMBBELLS + BENCH', cue: 'Rear foot elevated on bench. Front foot far enough forward that knee tracks over toe. Slow down (3s), explosive up. 30s each side.', reps: '8 each', rx: '35lb / 16kg ea', scaled: '25lb / 11kg ea', light: '15lb / 7kg ea' },
-      { name: 'Single-Arm KB Row', equip: 'KETTLEBELL + BENCH', cue: 'Brace on bench. Pull KB to hip — not armpit. Full stretch at bottom, pause and squeeze at top. 30s each side.', reps: '10 each', rx: '44lb / 20kg', scaled: '35lb / 16kg', light: '26lb / 12kg' },
+      { name: 'Single-Leg Romanian Deadlift', equip: 'DUMBBELL', cue: 'Hold DB in opposite hand to standing leg (contralateral). Hinge until back is parallel, pause, drive through glute to stand. 30s each side.', reps: '8 each', rx: { m: '35lb / 16kg', w: '26lb / 12kg' }, scaled: { m: '25lb / 11kg', w: '15lb / 7kg' }, light: { m: '15lb / 7kg', w: '10lb / 5kg' } },
+      { name: 'Bulgarian Split Squats', equip: 'DUMBBELLS + BENCH', cue: 'Rear foot elevated on bench. Front foot far enough forward that knee tracks over toe. Slow down (3s), explosive up. 30s each side.', reps: '8 each', rx: { m: '35lb / 16kg ea', w: '25lb / 11kg ea' }, scaled: { m: '25lb / 11kg ea', w: '15lb / 7kg ea' }, light: { m: '15lb / 7kg ea', w: '10lb / 5kg ea' } },
+      { name: 'Single-Arm KB Row', equip: 'KETTLEBELL + BENCH', cue: 'Brace on bench. Pull KB to hip — not armpit. Full stretch at bottom, pause and squeeze at top. 30s each side.', reps: '10 each', rx: { m: '44lb / 20kg', w: '26lb / 12kg' }, scaled: { m: '35lb / 16kg', w: '26lb / 12kg' }, light: { m: '26lb / 12kg', w: '18lb / 8kg' } },
       { name: 'Pistol Squat Progression', equip: 'BODYWEIGHT / BENCH', cue: 'Use bench as target for box pistols if full pistol isn\'t there yet. Sit to the edge, extend one leg, stand on one leg. Build control.', reps: '5 each' },
-      { name: 'Single-Arm KB Press', equip: 'KETTLEBELL', cue: 'Stand or seated. Press one arm at a time — the anti-rotation demand forces deep core engagement. 30s each side.', reps: '8 each', rx: '35lb / 16kg', scaled: '26lb / 12kg', light: '18lb / 8kg' },
+      { name: 'Single-Arm KB Press', equip: 'KETTLEBELL', cue: 'Stand or seated. Press one arm at a time — the anti-rotation demand forces deep core engagement. 30s each side.', reps: '8 each', rx: { m: '35lb / 16kg', w: '26lb / 12kg' }, scaled: { m: '26lb / 12kg', w: '18lb / 8kg' }, light: { m: '18lb / 8kg', w: '12lb / 5kg' } },
       { name: 'Pull-Up Negatives', equip: 'PULL-UP BAR', cue: 'Jump to top position, then lower as slowly as possible — aim for 5–8 seconds down. Full dead hang at bottom. Max quality reps.', reps: '5-8' }
     ]
   },
@@ -2384,10 +2393,10 @@ const WODS_EXTRA = [
     color: '#aaaaaa',
     day: 'ALT',
     movements: [
-      { name: 'Barbell Good Mornings', equip: 'BARBELL', cue: 'Light weight — this is movement quality work. Hinge at hip, soft knee, feel the hamstring load. NOT a strength set. Slow and controlled.', reps: '12-15', rx: '65lb / 29kg', scaled: '45lb / 20kg', light: '35lb / 16kg' },
-      { name: 'DB Farmer\'s Carry', equip: 'DUMBBELLS', cue: 'Moderate weight. Walk with perfect posture — shoulders back, core braced, no lean. Great for grip, traps, and postural muscles.', reps: '40yd / 36m', rx: '50lb / 23kg ea', scaled: '35lb / 16kg ea', light: '25lb / 11kg ea' },
+      { name: 'Barbell Good Mornings', equip: 'BARBELL', cue: 'Light weight — this is movement quality work. Hinge at hip, soft knee, feel the hamstring load. NOT a strength set. Slow and controlled.', reps: '12-15', rx: { m: '65lb / 29kg', w: '45lb / 20kg' }, scaled: { m: '45lb / 20kg', w: '35lb / 16kg' }, light: { m: '35lb / 16kg', w: '26lb / 12kg' } },
+      { name: 'DB Farmer\'s Carry', equip: 'DUMBBELLS', cue: 'Moderate weight. Walk with perfect posture — shoulders back, core braced, no lean. Great for grip, traps, and postural muscles.', reps: '40yd / 36m', rx: { m: '50lb / 23kg ea', w: '35lb / 16kg ea' }, scaled: { m: '35lb / 16kg ea', w: '25lb / 11kg ea' }, light: { m: '25lb / 11kg ea', w: '15lb / 7kg ea' } },
       { name: 'Dead Hang', equip: 'PULL-UP BAR', cue: 'Full passive hang. Let the shoulders decompress. Breathe slowly. Great for shoulder health and spinal decompression. Hold the full 45–60s.', reps: 'Max hold' },
-      { name: 'KB Halo', equip: 'KETTLEBELL', cue: 'Light KB. Circle the bell slowly around your head — controlled movement through full shoulder range of motion. Alternate direction each rep.', reps: '8 each way', rx: '26lb / 12kg', scaled: '18lb / 8kg', light: '10lb / 5kg' },
+      { name: 'KB Halo', equip: 'KETTLEBELL', cue: 'Light KB. Circle the bell slowly around your head — controlled movement through full shoulder range of motion. Alternate direction each rep.', reps: '8 each way', rx: { m: '26lb / 12kg', w: '18lb / 8kg' }, scaled: { m: '18lb / 8kg', w: '12lb / 5kg' }, light: { m: '10lb / 5kg', w: '8lb / 4kg' } },
       { name: 'Glute Bridge (Bodyweight)', equip: 'BODYWEIGHT', cue: 'Slow, deliberate. 3 seconds up, 2 second hold at top, 3 seconds down. Focus on the mind-muscle connection — feel the glute fire, not the hamstring.', reps: '15-20' },
       { name: 'Bird Dog', equip: 'BODYWEIGHT', cue: 'Opposite arm + leg extend while maintaining a perfectly flat back. Hold 2 seconds. This resets the deep stabilisers and is one of the best deload movements there is.', reps: '10 each' }
     ]
@@ -2481,7 +2490,7 @@ let currentRound = 1;
 let sessionStartTime = null;
 let totalElapsed = 0;
 
-const defaultSettings = { work: 60, rest: 15, roundRest: 60, rounds: 4, sound: true, vibration: true, theme: 'dark', scale: 'rx' };
+const defaultSettings = { work: 60, rest: 15, roundRest: 60, rounds: 4, sound: true, vibration: true, theme: 'dark', scale: 'rx', gender: 'm' };
 let settings = { ...defaultSettings, ...JSON.parse(localStorage.getItem('recompSettings') || '{}') };
 workoutMode = localStorage.getItem('recompMode') || 'circuit';
 
@@ -2558,6 +2567,7 @@ function init() {
   document.getElementById('soundToggle').textContent = settings.sound ? '🔊 ON' : '🔇 OFF';
   document.getElementById('vibrationToggle').textContent = settings.vibration ? '📳 ON' : '📳 OFF';
   applyTheme();
+  setGender(settings.gender || 'm');
   setScale(settings.scale || 'rx');
   setMode(workoutMode);
 }
@@ -3444,6 +3454,14 @@ function toggleTheme() {
   saveUserPrefs();
 }
 
+function setGender(g) {
+  settings.gender = g;
+  document.getElementById('genderM').classList.toggle('active', g === 'm');
+  document.getElementById('genderW').classList.toggle('active', g === 'w');
+  updatePrescriptionDisplay();
+  saveUserPrefs();
+}
+
 function setScale(level) {
   settings.scale = level;
   document.getElementById('scaleRx').classList.toggle('active', level === 'rx');
@@ -3462,8 +3480,11 @@ function updatePrescriptionDisplay() {
   }
 
   const scale = settings.scale || 'rx';
-  const weight = mv[scale];
+  const gender = settings.gender || 'm';
   const labelMap = { rx: 'RX', scaled: 'SCALED', light: 'LIGHT' };
+  const raw = mv[scale];
+  // Support both old string format and new {m,w} object format
+  const weight = raw && typeof raw === 'object' ? raw[gender] : raw;
 
   document.getElementById('exScaleLabel').textContent = labelMap[scale];
   document.getElementById('exReps').textContent = mv.reps;
