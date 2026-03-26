@@ -236,53 +236,81 @@
   }
 
   /* ── SCHEDULE GRID ── */
-  .schedule-row {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
-    margin-bottom: 28px;
-  }
-
-  .schedule-day {
+  /* ── TODAY'S SUGGESTION ── */
+  .today-suggestion {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px 8px;
-    text-align: center;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .today-suggestion:hover { border-color: var(--accent); transform: translateY(-1px); }
+
+  .today-sug-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--muted2);
+    text-transform: uppercase;
+    white-space: nowrap;
   }
 
-  .schedule-day .day-name {
+  .today-sug-color {
+    width: 4px;
+    height: 40px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .today-sug-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .today-sug-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .today-sug-focus {
+    font-size: 11px;
+    color: var(--muted2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .today-sug-go {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
     font-family: 'DM Mono', monospace;
     font-size: 10px;
-    color: var(--muted2);
-    letter-spacing: 1px;
-    margin-bottom: 6px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
-  .schedule-day .day-wod {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 13px;
-    letter-spacing: 1px;
-  }
-
-  .schedule-day.rest .day-wod { color: var(--muted); }
-  .schedule-day.today { border-color: var(--accent); }
-  .schedule-day.today .day-name { color: var(--accent); }
-
-  .rest-day-tip {
-    display: none;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 18px;
-    margin-top: 12px;
+  .today-sug-rest {
     font-family: 'DM Mono', monospace;
     font-size: 11px;
     color: var(--muted2);
     line-height: 1.5;
   }
-  .rest-day-tip.show { display: block; }
-  .rest-day-tip strong { color: var(--accent3); }
+  .today-sug-rest strong { color: var(--accent3); }
 
   /* ── START BAR (sticky bottom) ── */
   .start-bar {
@@ -1564,6 +1592,136 @@
   .builder-btn.primary:disabled { opacity: 0.3; cursor: default; }
   .builder-btn.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
 
+  /* ── WORKOUT PREVIEW ── */
+  .preview-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    backdrop-filter: blur(12px);
+  }
+  .preview-overlay.show { opacity: 1; pointer-events: all; }
+
+  .preview-card {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 28px 24px;
+    max-width: 500px;
+    width: 94%;
+    max-height: 85vh;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+  }
+
+  .preview-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted2);
+    margin-bottom: 4px;
+  }
+
+  .preview-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 3px;
+    margin-bottom: 4px;
+  }
+
+  .preview-focus {
+    font-size: 12px;
+    color: var(--muted2);
+    margin-bottom: 16px;
+  }
+
+  .preview-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .preview-meta-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--muted2);
+  }
+
+  .preview-movements {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .preview-mv {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .preview-mv-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    color: var(--muted);
+    min-width: 24px;
+    line-height: 1;
+    padding-top: 2px;
+  }
+
+  .preview-mv-info { flex: 1; min-width: 0; }
+
+  .preview-mv-name {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  .preview-mv-detail {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted2);
+  }
+
+  .preview-mv-weight {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+  }
+
+  .preview-btns {
+    display: flex;
+    gap: 10px;
+  }
+
+  .preview-btn {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 3px;
+    cursor: pointer;
+  }
+  .preview-btn.primary { color: #000; }
+  .preview-btn.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+
   /* ── SCALE SELECTOR ── */
   .scale-toggle {
     display: flex;
@@ -1835,7 +1993,6 @@
     header { padding: 16px; }
     .view { padding: 16px; }
     .stats-strip { grid-template-columns: repeat(2, 1fr); }
-    .schedule-row { grid-template-columns: repeat(4, 1fr); }
     .wod-grid { grid-template-columns: 1fr; }
   }
 </style>
@@ -1863,9 +2020,7 @@
      ════════════════════════════════════ -->
 <div class="view active" id="view-select">
 
-  <p class="section-title">WEEKLY SCHEDULE</p>
-  <div class="schedule-row" id="scheduleRow"></div>
-  <div class="rest-day-tip" id="restDayTip"></div>
+  <div id="todaySuggestion"></div>
 
   <p class="section-title">SELECT YOUR SESSION</p>
   <div class="cat-filter">
@@ -2134,7 +2289,12 @@
 
 <!-- Sticky Start Bar -->
 <div class="start-bar" id="startBar">
-  <button class="start-btn" id="startBtn" onclick="goToTimer()">SELECT A WOD TO BEGIN</button>
+  <button class="start-btn" id="startBtn" onclick="openPreview()">SELECT A WOD TO BEGIN</button>
+</div>
+
+<!-- Workout Preview Overlay -->
+<div class="preview-overlay" id="previewOverlay" onclick="closePreview(event)">
+  <div class="preview-card" id="previewCard" onclick="event.stopPropagation()"></div>
 </div>
 
 <!-- Exercise Demo Modal -->
@@ -2596,38 +2756,39 @@ const REST_DAY_TIPS = [
 
 function renderSchedule() {
   const today = new Date().getDay();
-  const dayMap = [6, 0, 1, 2, 3, 4, 5];
+  const dayMap = [6, 0, 1, 2, 3, 4, 5]; // Sun=6, Mon=0, ...
   const todayIdx = dayMap[today];
   const todaySchedule = SCHEDULE[todayIdx];
+  const dayNames = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+  const container = document.getElementById('todaySuggestion');
 
-  document.getElementById('scheduleRow').innerHTML = SCHEDULE.map((s, i) => {
-    const isToday = i === todayIdx;
-    let color = 'var(--muted)';
-    let label = 'REST';
-
-    if (s.type === 'wod') {
-      const wod = WODS.find(w => w.id === s.wod);
-      if (wod) { color = wod.color; label = `WOD ${s.wod}`; }
-    } else if (s.type === 'mobility') {
-      const mob = MOBILITY.find(m => m.id === s.wod);
-      if (mob) { color = mob.color; label = 'MOB'; }
+  if (todaySchedule.type === 'wod') {
+    const wod = WODS.find(w => w.id === todaySchedule.wod);
+    if (wod) {
+      container.innerHTML = `
+        <div class="today-suggestion" onclick="selectSession('${wod.id}')">
+          <div class="today-sug-color" style="background:${wod.color}"></div>
+          <div class="today-sug-info">
+            <div class="today-sug-badge">${dayNames[todayIdx]} SUGGESTION</div>
+            <div class="today-sug-name" style="color:${wod.color}">${wod.tag} ${wod.name}</div>
+            <div class="today-sug-focus">${wod.focus}</div>
+          </div>
+          <button class="today-sug-go" style="background:${wod.color}" onclick="quickStart('${wod.id}', event)">GO</button>
+        </div>`;
     }
-
-    return `
-      <div class="schedule-day ${s.type !== 'wod' && s.type !== 'mobility' ? 'rest' : ''} ${isToday ? 'today' : ''}">
-        <div class="day-name">${s.day}</div>
-        <div class="day-wod" style="color:${color}">${label}</div>
-      </div>`;
-  }).join('');
-
-  // Rest-day / mobility-day tip
-  const tipEl = document.getElementById('restDayTip');
-  if (todaySchedule && todaySchedule.type === 'mobility') {
+  } else if (todaySchedule.type === 'mobility') {
+    const mob = MOBILITY.find(m => m.id === todaySchedule.wod);
     const tip = REST_DAY_TIPS[Math.floor(Math.random() * REST_DAY_TIPS.length)];
-    tipEl.innerHTML = `<strong>RECOVERY TIP</strong> &mdash; ${tip}`;
-    tipEl.classList.add('show');
-  } else {
-    tipEl.classList.remove('show');
+    container.innerHTML = `
+      <div class="today-suggestion" onclick="selectSession('${mob ? mob.id : ''}')">
+        <div class="today-sug-color" style="background:${mob ? mob.color : 'var(--muted)'}"></div>
+        <div class="today-sug-info">
+          <div class="today-sug-badge">${dayNames[todayIdx]} — RECOVERY DAY</div>
+          <div class="today-sug-name" style="color:${mob ? mob.color : 'var(--muted2)'}">${mob ? mob.name : 'REST'}</div>
+          <div class="today-sug-rest"><strong>TIP</strong> &mdash; ${tip}</div>
+        </div>
+        ${mob ? `<button class="today-sug-go" style="background:${mob.color}" onclick="quickStart('${mob.id}', event)">GO</button>` : ''}
+      </div>`;
   }
 }
 
@@ -3454,6 +3615,68 @@ function toggleTheme() {
   saveUserPrefs();
 }
 
+function openPreview() {
+  if (!selectedWOD) return;
+  const wod = selectedWOD;
+  const scale = settings.scale || 'rx';
+  const gender = settings.gender || 'm';
+  const labelMap = { rx: 'RX', scaled: 'SCALED', light: 'LIGHT' };
+
+  // Collect unique equipment
+  const equipSet = new Set(wod.movements.map(m => m.equip));
+  const equipList = [...equipSet].join(' · ');
+
+  // Estimate duration
+  const mvCount = wod.movements.length;
+  const rounds = settings.rounds;
+  const estMin = Math.round((mvCount * (settings.work + settings.rest) * rounds + (rounds - 1) * settings.roundRest) / 60);
+
+  const card = document.getElementById('previewCard');
+  card.innerHTML = `
+    <div class="preview-tag">${wod.tag || 'WORKOUT'}</div>
+    <div class="preview-name" style="color:${wod.color}">${wod.name}</div>
+    <div class="preview-focus">${wod.focus}</div>
+
+    <div class="preview-meta">
+      <div class="preview-meta-item">${mvCount} MOVEMENTS</div>
+      <div class="preview-meta-item">${rounds} ROUNDS</div>
+      <div class="preview-meta-item">~${estMin} MIN</div>
+      <div class="preview-meta-item">${labelMap[scale]}</div>
+    </div>
+
+    <div class="preview-movements">
+      ${wod.movements.map((mv, i) => {
+        const raw = mv[scale];
+        const weight = raw && typeof raw === 'object' ? raw[gender] : raw;
+        return `
+          <div class="preview-mv">
+            <div class="preview-mv-num">${i + 1}</div>
+            <div class="preview-mv-info">
+              <div class="preview-mv-name">${mv.name}</div>
+              <div class="preview-mv-detail">${mv.equip}${mv.reps ? ' · ' + mv.reps : ''}</div>
+              ${weight ? `<div class="preview-mv-weight">${weight}</div>` : ''}
+            </div>
+          </div>`;
+      }).join('')}
+    </div>
+
+    <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:16px;">
+      EQUIPMENT: ${equipList}
+    </div>
+
+    <div class="preview-btns">
+      <button class="preview-btn secondary" onclick="closePreview()">BACK</button>
+      <button class="preview-btn primary" style="background:${wod.color}" onclick="closePreview(); goToTimer();">START</button>
+    </div>`;
+
+  document.getElementById('previewOverlay').classList.add('show');
+}
+
+function closePreview(e) {
+  if (e && e.target !== e.currentTarget && !e.target.closest('.preview-btn')) return;
+  document.getElementById('previewOverlay').classList.remove('show');
+}
+
 function setGender(g) {
   settings.gender = g;
   document.getElementById('genderM').classList.toggle('active', g === 'm');
@@ -3530,9 +3753,9 @@ function showView(name) {
 }
 
 function quickStart(id, e) {
-  e.stopPropagation(); // don't also fire the card's selectSession
+  e.stopPropagation();
   selectSession(id);
-  goToTimer();
+  openPreview();
 }
 
 // ═══════════════════════════════
