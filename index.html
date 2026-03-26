@@ -1704,6 +1704,25 @@
     color: var(--accent);
   }
 
+  .preview-mv-demo {
+    flex-shrink: 0;
+    align-self: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: border-color 0.15s;
+  }
+  .preview-mv-demo:hover { border-color: var(--accent3); }
+  .preview-mv-demo.no-img { opacity: 0.3; cursor: default; }
+  .preview-mv-demo.no-img:hover { border-color: var(--border); }
+
   .preview-btns {
     display: flex;
     gap: 10px;
@@ -3648,6 +3667,7 @@ function openPreview() {
       ${wod.movements.map((mv, i) => {
         const raw = mv[scale];
         const weight = raw && typeof raw === 'object' ? raw[gender] : raw;
+        const hasImg = !!EXERCISE_IMAGES[mv.name];
         return `
           <div class="preview-mv">
             <div class="preview-mv-num">${i + 1}</div>
@@ -3656,6 +3676,7 @@ function openPreview() {
               <div class="preview-mv-detail">${mv.equip}${mv.reps ? ' · ' + mv.reps : ''}</div>
               ${weight ? `<div class="preview-mv-weight">${weight}</div>` : ''}
             </div>
+            <div class="preview-mv-demo${hasImg ? '' : ' no-img'}" ${hasImg ? `onclick="openPreviewDemo('${wod.id}', ${i})"` : ''} title="${hasImg ? 'View demo' : 'No demo available'}">?</div>
           </div>`;
       }).join('')}
     </div>
@@ -3961,9 +3982,8 @@ const EXERCISE_IMAGES = {
 
 let demoInterval = null;
 
-function openExDemo() {
-  if (!selectedWOD) return;
-  const mv = selectedWOD.movements[currentMovement];
+function openExDemo(mvOverride) {
+  const mv = mvOverride || (selectedWOD && selectedWOD.movements[currentMovement]);
   if (!mv) return;
 
   document.getElementById('exDemoTitle').textContent = mv.name;
@@ -3978,7 +3998,6 @@ function openExDemo() {
     const url1 = `${IMG_BASE}/${folder}/1.jpg`;
     wrap.innerHTML = `<img id="demoFrame0" src="${url0}" alt="${mv.name} start"><img id="demoFrame1" src="${url1}" alt="${mv.name} end" class="hidden">`;
 
-    // Animate between the two frames
     let showFirst = true;
     clearInterval(demoInterval);
     demoInterval = setInterval(() => {
@@ -3994,6 +4013,11 @@ function openExDemo() {
   }
 
   document.getElementById('exDemoModal').classList.add('show');
+}
+
+function openPreviewDemo(wodId, mvIdx) {
+  const wod = ALL_SESSIONS.find(s => String(s.id) === String(wodId));
+  if (wod && wod.movements[mvIdx]) openExDemo(wod.movements[mvIdx]);
 }
 
 function closeExDemo(e) {
