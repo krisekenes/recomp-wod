@@ -1564,6 +1564,46 @@
   .builder-btn.primary:disabled { opacity: 0.3; cursor: default; }
   .builder-btn.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
 
+  /* ── SCALE SELECTOR ── */
+  .scale-toggle {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .scale-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--muted2);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .scale-btn:hover { border-color: var(--muted2); }
+  .scale-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
+  .scale-btn.active.scaled-btn { background: var(--accent3); border-color: var(--accent3); }
+  .scale-btn.active.light-btn { background: var(--muted2); border-color: var(--muted2); }
+
+  .ex-prescription {
+    display: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    margin: 8px 0;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .ex-prescription.show { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .ex-rx-label { color: var(--accent); font-weight: 700; font-size: 10px; letter-spacing: 1px; }
+  .ex-rx-reps { color: var(--accent3); }
+  .ex-rx-weight { color: var(--text); }
+
   /* ── EXERCISE DEMO ── */
   .ex-demo-wrap {
     margin: 12px 0;
@@ -1679,6 +1719,117 @@
   }
   .ex-demo-close:hover { border-color: var(--accent3); }
 
+  /* ── WOD GENERATOR ── */
+  .gen-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    backdrop-filter: blur(12px);
+  }
+  .gen-overlay.show { opacity: 1; pointer-events: all; }
+
+  .gen-card {
+    background: var(--surface);
+    border: 1px solid var(--accent2);
+    border-radius: 20px;
+    padding: 28px 24px;
+    max-width: 560px;
+    width: 94%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 0 60px rgba(255,90,58,0.1);
+  }
+
+  .gen-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 3px;
+    margin-bottom: 4px;
+  }
+
+  .gen-subtitle {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted2);
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+  }
+
+  .gen-field-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted2);
+    margin-bottom: 8px;
+  }
+
+  .gen-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .gen-opt {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .gen-opt:hover { border-color: var(--accent2); }
+  .gen-opt.active { background: var(--accent2); color: #000; border-color: var(--accent2); font-weight: 700; }
+
+  .gen-results {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .gen-results.show { display: flex; }
+
+  .gen-result-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .gen-result-card:hover { border-color: var(--accent2); }
+
+  .gen-result-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: var(--accent2);
+    margin-bottom: 4px;
+  }
+
+  .gen-result-focus {
+    font-size: 11px;
+    color: var(--muted2);
+    margin-bottom: 8px;
+  }
+
+  .gen-result-mvs {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted2);
+    line-height: 1.6;
+  }
+
   /* ── RESPONSIVE ── */
   @media (max-width: 600px) {
     header { padding: 16px; }
@@ -1725,6 +1876,7 @@
     <button class="cat-btn" data-cat="deload" onclick="filterCat('deload',this)">DELOAD</button>
     <button class="cat-btn" data-cat="custom" onclick="filterCat('custom',this)">CUSTOM</button>
     <button class="cat-btn" style="background:var(--accent3);color:#000;border-color:var(--accent3);" onclick="openBuilder()">+ BUILD</button>
+    <button class="cat-btn" style="background:var(--accent2);color:#000;border-color:var(--accent2);" onclick="openGenerator()">⚡ GENERATE</button>
   </div>
   <div class="wod-grid" id="wodGrid"></div>
 
@@ -1800,6 +1952,18 @@
       <div class="current-ex">
         <div class="current-ex-label">CURRENT MOVEMENT</div>
         <div class="current-ex-name" id="exName">—</div>
+
+        <div class="ex-prescription" id="exPrescription">
+          <span class="ex-rx-label" id="exScaleLabel">RX</span>
+          <span class="ex-rx-reps" id="exReps"></span>
+          <span class="ex-rx-weight" id="exWeight"></span>
+        </div>
+
+        <div class="scale-toggle" id="scaleToggle">
+          <button class="scale-btn active" id="scaleRx" onclick="setScale('rx')">RX</button>
+          <button class="scale-btn scaled-btn" id="scaleScaled" onclick="setScale('scaled')">SCALED</button>
+          <button class="scale-btn light-btn" id="scaleLight" onclick="setScale('light')">LIGHT</button>
+        </div>
 
         <div class="ex-demo-wrap" id="exDemoWrap">
           <button class="ex-demo-btn" onclick="openExDemo()">? HOW TO DO THIS</button>
@@ -1976,6 +2140,45 @@
   </div>
 </div>
 
+<!-- WOD Generator Overlay -->
+<div class="gen-overlay" id="genOverlay">
+  <div class="gen-card">
+    <div class="gen-title">GENERATE A WOD</div>
+    <div class="gen-subtitle">PICK YOUR PARAMETERS — WE'LL BUILD IT</div>
+
+    <div class="gen-field-label">INTENSITY</div>
+    <div class="gen-options" id="genIntensity">
+      <button class="gen-opt" onclick="setGenOpt('intensity','light',this)">LIGHT</button>
+      <button class="gen-opt active" onclick="setGenOpt('intensity','moderate',this)">MODERATE</button>
+      <button class="gen-opt" onclick="setGenOpt('intensity','intense',this)">INTENSE</button>
+    </div>
+
+    <div class="gen-field-label">EQUIPMENT</div>
+    <div class="gen-options" id="genEquip">
+      <button class="gen-opt active" onclick="toggleGenEquip('BARBELL',this)">BARBELL</button>
+      <button class="gen-opt active" onclick="toggleGenEquip('KETTLEBELL',this)">KETTLEBELL</button>
+      <button class="gen-opt active" onclick="toggleGenEquip('DUMBBELLS',this)">DUMBBELLS</button>
+      <button class="gen-opt" onclick="toggleGenEquip('BODYWEIGHT',this)">BODYWEIGHT ONLY</button>
+    </div>
+
+    <div class="gen-field-label">FOCUS</div>
+    <div class="gen-options" id="genFocus">
+      <button class="gen-opt active" onclick="setGenOpt('focus','full',this)">FULL BODY</button>
+      <button class="gen-opt" onclick="setGenOpt('focus','upper',this)">UPPER BODY</button>
+      <button class="gen-opt" onclick="setGenOpt('focus','lower',this)">LOWER BODY</button>
+      <button class="gen-opt" onclick="setGenOpt('focus','posterior',this)">POSTERIOR CHAIN</button>
+      <button class="gen-opt" onclick="setGenOpt('focus','metabolic',this)">METABOLIC</button>
+    </div>
+
+    <div class="builder-btns">
+      <button class="builder-btn secondary" onclick="closeGenerator()">CANCEL</button>
+      <button class="builder-btn primary" style="background:var(--accent2);border-color:var(--accent2);" onclick="generateWODs()">GENERATE</button>
+    </div>
+
+    <div class="gen-results" id="genResults"></div>
+  </div>
+</div>
+
 <!-- Custom WOD Builder Overlay -->
 <div class="builder-overlay" id="builderOverlay">
   <div class="builder-card">
@@ -2006,12 +2209,12 @@ const WODS = [
     color: '#e8ff3a',
     day: 'MON',
     movements: [
-      { name: 'Barbell Back Squats', equip: 'BARBELL', cue: '1.5 Rep method: All the way down, halfway up, back down, then stand. Brutal on the quads.' },
-      { name: 'Kettlebell Swings', equip: 'KETTLEBELL', cue: 'Power focus — snap the hips aggressively. Drive from the posterior chain, not the arms.' },
-      { name: 'Dumbbell Reverse Lunges', equip: 'DUMBBELLS', cue: 'Alternate legs. Keep torso upright for quad focus. Step back far enough for 90° knee angle.' },
-      { name: 'Barbell Romanian Deadlifts', equip: 'BARBELL', cue: 'Slow eccentric (3 seconds down). Feel the stretch in hamstrings and glutes before driving up.' },
-      { name: 'Kettlebell Goblet Squats', equip: 'KETTLEBELL', cue: 'Hold at chest level. Pause 1 full second at the bottom — don\'t bounce out.' },
-      { name: 'Jump Squats', equip: 'BODYWEIGHT', cue: 'Max height every rep. Land softly, absorb through hips. This spikes the heart rate for fat burn.' }
+      { name: 'Barbell Back Squats', equip: 'BARBELL', cue: '1.5 Rep method: All the way down, halfway up, back down, then stand. Brutal on the quads.', reps: '8-10', rx: '135lb / 61kg', scaled: '95lb / 43kg', light: '65lb / 29kg' },
+      { name: 'Kettlebell Swings', equip: 'KETTLEBELL', cue: 'Power focus — snap the hips aggressively. Drive from the posterior chain, not the arms.', reps: '15-20', rx: '53lb / 24kg', scaled: '35lb / 16kg', light: '26lb / 12kg' },
+      { name: 'Dumbbell Reverse Lunges', equip: 'DUMBBELLS', cue: 'Alternate legs. Keep torso upright for quad focus. Step back far enough for 90° knee angle.', reps: '10 each', rx: '40lb / 18kg ea', scaled: '25lb / 11kg ea', light: '15lb / 7kg ea' },
+      { name: 'Barbell Romanian Deadlifts', equip: 'BARBELL', cue: 'Slow eccentric (3 seconds down). Feel the stretch in hamstrings and glutes before driving up.', reps: '10-12', rx: '135lb / 61kg', scaled: '95lb / 43kg', light: '65lb / 29kg' },
+      { name: 'Kettlebell Goblet Squats', equip: 'KETTLEBELL', cue: 'Hold at chest level. Pause 1 full second at the bottom — don\'t bounce out.', reps: '12-15', rx: '53lb / 24kg', scaled: '35lb / 16kg', light: '26lb / 12kg' },
+      { name: 'Jump Squats', equip: 'BODYWEIGHT', cue: 'Max height every rep. Land softly, absorb through hips. This spikes the heart rate for fat burn.', reps: 'Max reps' }
     ]
   },
   {
@@ -2022,12 +2225,12 @@ const WODS = [
     color: '#3adfff',
     day: 'TUE',
     movements: [
-      { name: 'Barbell Overhead Press', equip: 'BARBELL', cue: 'Strict — no leg drive. Core tight, ribs down. Press through the ceiling, lower controlled.' },
-      { name: 'Dumbbell Renegade Rows', equip: 'DUMBBELLS', cue: 'Push-up → Row Left → Row Right = 1 rep. Keep hips square. Anti-rotation core challenge.' },
-      { name: 'Kettlebell Clean & Press', equip: 'KETTLEBELL', cue: 'Alternate arms each rep. Catch in the rack position cleanly before pressing overhead.' },
-      { name: 'Barbell Bent-Over Rows', equip: 'BARBELL', cue: 'Underhand supinated grip to engage lats and biceps. Pull to the lower chest. Flat back throughout.' },
-      { name: 'Dumbbell Floor Press', equip: 'DUMBBELLS', cue: 'Chest focus. Pause briefly when elbows touch the floor — eliminates momentum, maximizes tension.' },
-      { name: 'Weighted Russian Twists', equip: 'KETTLEBELL', cue: 'Use a light KB. Touch the floor on each side. Lean back 45° and keep feet elevated.' }
+      { name: 'Barbell Overhead Press', equip: 'BARBELL', cue: 'Strict — no leg drive. Core tight, ribs down. Press through the ceiling, lower controlled.', reps: '8-10', rx: '95lb / 43kg', scaled: '75lb / 34kg', light: '55lb / 25kg' },
+      { name: 'Dumbbell Renegade Rows', equip: 'DUMBBELLS', cue: 'Push-up → Row Left → Row Right = 1 rep. Keep hips square. Anti-rotation core challenge.', reps: '6-8', rx: '35lb / 16kg ea', scaled: '25lb / 11kg ea', light: '15lb / 7kg ea' },
+      { name: 'Kettlebell Clean & Press', equip: 'KETTLEBELL', cue: 'Alternate arms each rep. Catch in the rack position cleanly before pressing overhead.', reps: '8 each', rx: '44lb / 20kg', scaled: '35lb / 16kg', light: '26lb / 12kg' },
+      { name: 'Barbell Bent-Over Rows', equip: 'BARBELL', cue: 'Underhand supinated grip to engage lats and biceps. Pull to the lower chest. Flat back throughout.', reps: '10-12', rx: '115lb / 52kg', scaled: '85lb / 39kg', light: '65lb / 29kg' },
+      { name: 'Dumbbell Floor Press', equip: 'DUMBBELLS', cue: 'Chest focus. Pause briefly when elbows touch the floor — eliminates momentum, maximizes tension.', reps: '10-12', rx: '40lb / 18kg ea', scaled: '30lb / 14kg ea', light: '20lb / 9kg ea' },
+      { name: 'Weighted Russian Twists', equip: 'KETTLEBELL', cue: 'Use a light KB. Touch the floor on each side. Lean back 45° and keep feet elevated.', reps: '20 total', rx: '26lb / 12kg', scaled: '18lb / 8kg', light: '10lb / 5kg' }
     ]
   },
   {
@@ -2038,12 +2241,12 @@ const WODS = [
     color: '#ff9f3a',
     day: 'WED',
     movements: [
-      { name: 'Barbell Deadlifts', equip: 'BARBELL', cue: 'Standard grip. Reset with a flat back each rep. Don\'t round the lumbar. Brace hard before each pull.' },
-      { name: 'KB Suitcase Carry', equip: 'KETTLEBELL', cue: 'Heavy KB in LEFT hand. Walk perfectly vertical — don\'t let it pull your shoulder. Switch hands next round.' },
-      { name: 'Dumbbell Stiff-Leg Deadlifts', equip: 'DUMBBELLS', cue: 'Slight knee bend. Hinge at the hip, feel the hamstring stretch. Squeeze glutes aggressively at the top.' },
-      { name: 'KB Goblet Lateral Lunges', equip: 'KETTLEBELL', cue: 'Alternate sides. Stay low in the transition — don\'t stand fully between reps. Hit the inner thigh.' },
-      { name: 'Barbell Glute Bridges', equip: 'BARBELL', cue: 'Bar on hips (use a pad). Squeeze glutes hard at the top and hold 1 second. Drive through the heels.' },
-      { name: 'Hollow Body Hold', equip: 'BODYWEIGHT', cue: 'Lower back PRESSED into floor. Arms extended overhead, legs hovering 6 inches. Breathe and hold.' }
+      { name: 'Barbell Deadlifts', equip: 'BARBELL', cue: 'Standard grip. Reset with a flat back each rep. Don\'t round the lumbar. Brace hard before each pull.', reps: '6-8', rx: '185lb / 84kg', scaled: '135lb / 61kg', light: '95lb / 43kg' },
+      { name: 'KB Suitcase Carry', equip: 'KETTLEBELL', cue: 'Heavy KB in LEFT hand. Walk perfectly vertical — don\'t let it pull your shoulder. Switch hands next round.', reps: '40yd / 36m', rx: '53lb / 24kg', scaled: '35lb / 16kg', light: '26lb / 12kg' },
+      { name: 'Dumbbell Stiff-Leg Deadlifts', equip: 'DUMBBELLS', cue: 'Slight knee bend. Hinge at the hip, feel the hamstring stretch. Squeeze glutes aggressively at the top.', reps: '10-12', rx: '40lb / 18kg ea', scaled: '30lb / 14kg ea', light: '20lb / 9kg ea' },
+      { name: 'KB Goblet Lateral Lunges', equip: 'KETTLEBELL', cue: 'Alternate sides. Stay low in the transition — don\'t stand fully between reps. Hit the inner thigh.', reps: '8 each', rx: '44lb / 20kg', scaled: '35lb / 16kg', light: '26lb / 12kg' },
+      { name: 'Barbell Glute Bridges', equip: 'BARBELL', cue: 'Bar on hips (use a pad). Squeeze glutes hard at the top and hold 1 second. Drive through the heels.', reps: '12-15', rx: '155lb / 70kg', scaled: '115lb / 52kg', light: '75lb / 34kg' },
+      { name: 'Hollow Body Hold', equip: 'BODYWEIGHT', cue: 'Lower back PRESSED into floor. Arms extended overhead, legs hovering 6 inches. Breathe and hold.', reps: 'Max hold' }
     ]
   },
   {
@@ -2054,12 +2257,12 @@ const WODS = [
     color: '#ff5a3a',
     day: 'FRI',
     movements: [
-      { name: 'Barbell Thrusters', equip: 'BARBELL', cue: 'Squat to overhead press in one explosive motion. Use the momentum from the squat to drive the press.' },
-      { name: 'Dumbbell Devil\'s Press', equip: 'DUMBBELLS', cue: 'Chest-to-floor burpee, then a double DB snatch in one motion. Full extension overhead. High intensity.' },
-      { name: 'KB American Swings', equip: 'KETTLEBELL', cue: 'Swing the bell all the way overhead — full extension at the top. More shoulder stability than Russian swings.' },
-      { name: 'Barbell Power Cleans', equip: 'BARBELL', cue: 'From floor to the front rack position. Fast hips, fast elbows. Keep the bar close to the body.' },
-      { name: 'DB Weighted Step-ups', equip: 'DUMBBELLS', cue: 'Use a bench or box. Alternate legs. Drive through the heel of the elevated foot. Keep core braced.' },
-      { name: 'Burpees Over the Bar', equip: 'BODYWEIGHT', cue: 'Chest to floor burpee, then jump laterally over your barbell. This is the heart rate spike finisher.' }
+      { name: 'Barbell Thrusters', equip: 'BARBELL', cue: 'Squat to overhead press in one explosive motion. Use the momentum from the squat to drive the press.', reps: '10-12', rx: '95lb / 43kg', scaled: '75lb / 34kg', light: '55lb / 25kg' },
+      { name: 'Dumbbell Devil\'s Press', equip: 'DUMBBELLS', cue: 'Chest-to-floor burpee, then a double DB snatch in one motion. Full extension overhead. High intensity.', reps: '6-8', rx: '35lb / 16kg ea', scaled: '25lb / 11kg ea', light: '15lb / 7kg ea' },
+      { name: 'KB American Swings', equip: 'KETTLEBELL', cue: 'Swing the bell all the way overhead — full extension at the top. More shoulder stability than Russian swings.', reps: '15-20', rx: '53lb / 24kg', scaled: '35lb / 16kg', light: '26lb / 12kg' },
+      { name: 'Barbell Power Cleans', equip: 'BARBELL', cue: 'From floor to the front rack position. Fast hips, fast elbows. Keep the bar close to the body.', reps: '6-8', rx: '135lb / 61kg', scaled: '95lb / 43kg', light: '65lb / 29kg' },
+      { name: 'DB Weighted Step-ups', equip: 'DUMBBELLS', cue: 'Use a bench or box. Alternate legs. Drive through the heel of the elevated foot. Keep core braced.', reps: '8 each', rx: '35lb / 16kg ea', scaled: '25lb / 11kg ea', light: '15lb / 7kg ea' },
+      { name: 'Burpees Over the Bar', equip: 'BODYWEIGHT', cue: 'Chest to floor burpee, then jump laterally over your barbell. This is the heart rate spike finisher.', reps: 'Max reps' }
     ]
   },
   {
@@ -2070,12 +2273,12 @@ const WODS = [
     color: '#b03aff',
     day: 'SAT',
     movements: [
-      { name: 'Barbell Front Squats', equip: 'BARBELL', cue: 'Elbows up, creating a shelf. Engages core significantly more than back squats. Stay upright.' },
-      { name: 'Dumbbell Goblet Lunges', equip: 'DUMBBELLS', cue: 'Forward lunges — focus on pushing off the front heel to drive glute activation. Keep torso tall.' },
-      { name: 'KB Single-Arm Snatch', equip: 'KETTLEBELL', cue: 'Alternate arms every 5 reps. One explosive pull from below the hip to fully overhead. Control the descent.' },
-      { name: 'Barbell Upright Rows', equip: 'BARBELL', cue: 'Pull to chin level. Lead with the elbows. Focus on traps and side delts. Don\'t shrug at the top.' },
-      { name: 'DB Curl to Press', equip: 'DUMBBELLS', cue: 'Bicep curl into an overhead press. Maximize time under tension throughout. Slow and controlled.' },
-      { name: 'Plank to Pike', equip: 'BODYWEIGHT', cue: 'From a plank, walk feet toward hands until your hips pike up, then walk back out. Targets the deep core.' }
+      { name: 'Barbell Front Squats', equip: 'BARBELL', cue: 'Elbows up, creating a shelf. Engages core significantly more than back squats. Stay upright.', reps: '8-10', rx: '115lb / 52kg', scaled: '85lb / 39kg', light: '65lb / 29kg' },
+      { name: 'Dumbbell Goblet Lunges', equip: 'DUMBBELLS', cue: 'Forward lunges — focus on pushing off the front heel to drive glute activation. Keep torso tall.', reps: '10 each', rx: '40lb / 18kg', scaled: '25lb / 11kg', light: '15lb / 7kg' },
+      { name: 'KB Single-Arm Snatch', equip: 'KETTLEBELL', cue: 'Alternate arms every 5 reps. One explosive pull from below the hip to fully overhead. Control the descent.', reps: '10 each', rx: '44lb / 20kg', scaled: '35lb / 16kg', light: '26lb / 12kg' },
+      { name: 'Barbell Upright Rows', equip: 'BARBELL', cue: 'Pull to chin level. Lead with the elbows. Focus on traps and side delts. Don\'t shrug at the top.', reps: '12-15', rx: '75lb / 34kg', scaled: '55lb / 25kg', light: '45lb / 20kg' },
+      { name: 'DB Curl to Press', equip: 'DUMBBELLS', cue: 'Bicep curl into an overhead press. Maximize time under tension throughout. Slow and controlled.', reps: '8-10', rx: '30lb / 14kg ea', scaled: '20lb / 9kg ea', light: '12lb / 5kg ea' },
+      { name: 'Plank to Pike', equip: 'BODYWEIGHT', cue: 'From a plank, walk feet toward hands until your hips pike up, then walk back out. Targets the deep core.', reps: 'Max reps' }
     ]
   }
 ];
@@ -2165,12 +2368,12 @@ const WODS_EXTRA = [
     color: '#3affa0',
     day: 'ALT',
     movements: [
-      { name: 'Single-Leg Romanian Deadlift', equip: 'DUMBBELL', cue: 'Hold DB in opposite hand to standing leg (contralateral). Hinge until back is parallel, pause, drive through glute to stand. 30s each side.' },
-      { name: 'Bulgarian Split Squats', equip: 'DUMBBELLS + BENCH', cue: 'Rear foot elevated on bench. Front foot far enough forward that knee tracks over toe. Slow down (3s), explosive up. 30s each side.' },
-      { name: 'Single-Arm KB Row', equip: 'KETTLEBELL + BENCH', cue: 'Brace on bench. Pull KB to hip — not armpit. Full stretch at bottom, pause and squeeze at top. 30s each side.' },
-      { name: 'Pistol Squat Progression', equip: 'BODYWEIGHT / BENCH', cue: 'Use bench as target for box pistols if full pistol isn\'t there yet. Sit to the edge, extend one leg, stand on one leg. Build control.' },
-      { name: 'Single-Arm KB Press', equip: 'KETTLEBELL', cue: 'Stand or seated. Press one arm at a time — the anti-rotation demand forces deep core engagement. 30s each side.' },
-      { name: 'Pull-Up Negatives', equip: 'PULL-UP BAR', cue: 'Jump to top position, then lower as slowly as possible — aim for 5–8 seconds down. Full dead hang at bottom. Max quality reps.' }
+      { name: 'Single-Leg Romanian Deadlift', equip: 'DUMBBELL', cue: 'Hold DB in opposite hand to standing leg (contralateral). Hinge until back is parallel, pause, drive through glute to stand. 30s each side.', reps: '8 each', rx: '35lb / 16kg', scaled: '25lb / 11kg', light: '15lb / 7kg' },
+      { name: 'Bulgarian Split Squats', equip: 'DUMBBELLS + BENCH', cue: 'Rear foot elevated on bench. Front foot far enough forward that knee tracks over toe. Slow down (3s), explosive up. 30s each side.', reps: '8 each', rx: '35lb / 16kg ea', scaled: '25lb / 11kg ea', light: '15lb / 7kg ea' },
+      { name: 'Single-Arm KB Row', equip: 'KETTLEBELL + BENCH', cue: 'Brace on bench. Pull KB to hip — not armpit. Full stretch at bottom, pause and squeeze at top. 30s each side.', reps: '10 each', rx: '44lb / 20kg', scaled: '35lb / 16kg', light: '26lb / 12kg' },
+      { name: 'Pistol Squat Progression', equip: 'BODYWEIGHT / BENCH', cue: 'Use bench as target for box pistols if full pistol isn\'t there yet. Sit to the edge, extend one leg, stand on one leg. Build control.', reps: '5 each' },
+      { name: 'Single-Arm KB Press', equip: 'KETTLEBELL', cue: 'Stand or seated. Press one arm at a time — the anti-rotation demand forces deep core engagement. 30s each side.', reps: '8 each', rx: '35lb / 16kg', scaled: '26lb / 12kg', light: '18lb / 8kg' },
+      { name: 'Pull-Up Negatives', equip: 'PULL-UP BAR', cue: 'Jump to top position, then lower as slowly as possible — aim for 5–8 seconds down. Full dead hang at bottom. Max quality reps.', reps: '5-8' }
     ]
   },
   {
@@ -2182,12 +2385,12 @@ const WODS_EXTRA = [
     color: '#aaaaaa',
     day: 'ALT',
     movements: [
-      { name: 'Barbell Good Mornings', equip: 'BARBELL', cue: 'Light weight — this is movement quality work. Hinge at hip, soft knee, feel the hamstring load. NOT a strength set. Slow and controlled.' },
-      { name: 'DB Farmer\'s Carry', equip: 'DUMBBELLS', cue: 'Moderate weight. Walk with perfect posture — shoulders back, core braced, no lean. Great for grip, traps, and postural muscles.' },
-      { name: 'Dead Hang', equip: 'PULL-UP BAR', cue: 'Full passive hang. Let the shoulders decompress. Breathe slowly. Great for shoulder health and spinal decompression. Hold the full 45–60s.' },
-      { name: 'KB Halo', equip: 'KETTLEBELL', cue: 'Light KB. Circle the bell slowly around your head — controlled movement through full shoulder range of motion. Alternate direction each rep.' },
-      { name: 'Glute Bridge (Bodyweight)', equip: 'BODYWEIGHT', cue: 'Slow, deliberate. 3 seconds up, 2 second hold at top, 3 seconds down. Focus on the mind-muscle connection — feel the glute fire, not the hamstring.' },
-      { name: 'Bird Dog', equip: 'BODYWEIGHT', cue: 'Opposite arm + leg extend while maintaining a perfectly flat back. Hold 2 seconds. This resets the deep stabilisers and is one of the best deload movements there is.' }
+      { name: 'Barbell Good Mornings', equip: 'BARBELL', cue: 'Light weight — this is movement quality work. Hinge at hip, soft knee, feel the hamstring load. NOT a strength set. Slow and controlled.', reps: '12-15', rx: '65lb / 29kg', scaled: '45lb / 20kg', light: '35lb / 16kg' },
+      { name: 'DB Farmer\'s Carry', equip: 'DUMBBELLS', cue: 'Moderate weight. Walk with perfect posture — shoulders back, core braced, no lean. Great for grip, traps, and postural muscles.', reps: '40yd / 36m', rx: '50lb / 23kg ea', scaled: '35lb / 16kg ea', light: '25lb / 11kg ea' },
+      { name: 'Dead Hang', equip: 'PULL-UP BAR', cue: 'Full passive hang. Let the shoulders decompress. Breathe slowly. Great for shoulder health and spinal decompression. Hold the full 45–60s.', reps: 'Max hold' },
+      { name: 'KB Halo', equip: 'KETTLEBELL', cue: 'Light KB. Circle the bell slowly around your head — controlled movement through full shoulder range of motion. Alternate direction each rep.', reps: '8 each way', rx: '26lb / 12kg', scaled: '18lb / 8kg', light: '10lb / 5kg' },
+      { name: 'Glute Bridge (Bodyweight)', equip: 'BODYWEIGHT', cue: 'Slow, deliberate. 3 seconds up, 2 second hold at top, 3 seconds down. Focus on the mind-muscle connection — feel the glute fire, not the hamstring.', reps: '15-20' },
+      { name: 'Bird Dog', equip: 'BODYWEIGHT', cue: 'Opposite arm + leg extend while maintaining a perfectly flat back. Hold 2 seconds. This resets the deep stabilisers and is one of the best deload movements there is.', reps: '10 each' }
     ]
   }
 ];
@@ -2279,7 +2482,7 @@ let currentRound = 1;
 let sessionStartTime = null;
 let totalElapsed = 0;
 
-const defaultSettings = { work: 60, rest: 15, roundRest: 60, rounds: 4, sound: true, vibration: true, theme: 'dark' };
+const defaultSettings = { work: 60, rest: 15, roundRest: 60, rounds: 4, sound: true, vibration: true, theme: 'dark', scale: 'rx' };
 let settings = { ...defaultSettings, ...JSON.parse(localStorage.getItem('recompSettings') || '{}') };
 workoutMode = localStorage.getItem('recompMode') || 'circuit';
 
@@ -2356,6 +2559,7 @@ function init() {
   document.getElementById('soundToggle').textContent = settings.sound ? '🔊 ON' : '🔇 OFF';
   document.getElementById('vibrationToggle').textContent = settings.vibration ? '📳 ON' : '📳 OFF';
   applyTheme();
+  setScale(settings.scale || 'rx');
   setMode(workoutMode);
 }
 
@@ -2824,8 +3028,9 @@ function updateMovementDisplay() {
   document.getElementById('exName').textContent = mv.name;
   document.getElementById('exCue').textContent = mv.cue;
 
-  // Show demo button
+  // Show demo button and prescription
   document.getElementById('exDemoWrap').classList.add('show');
+  updatePrescriptionDisplay();
 
   // Show breathing cue for mobility sessions
   const beatEl = document.getElementById('beatBook');
@@ -3240,6 +3445,33 @@ function toggleTheme() {
   saveUserPrefs();
 }
 
+function setScale(level) {
+  settings.scale = level;
+  document.getElementById('scaleRx').classList.toggle('active', level === 'rx');
+  document.getElementById('scaleScaled').classList.toggle('active', level === 'scaled');
+  document.getElementById('scaleLight').classList.toggle('active', level === 'light');
+  updatePrescriptionDisplay();
+  saveUserPrefs();
+}
+
+function updatePrescriptionDisplay() {
+  if (!selectedWOD) return;
+  const mv = selectedWOD.movements[currentMovement];
+  if (!mv || !mv.reps) {
+    document.getElementById('exPrescription').classList.remove('show');
+    return;
+  }
+
+  const scale = settings.scale || 'rx';
+  const weight = mv[scale];
+  const labelMap = { rx: 'RX', scaled: 'SCALED', light: 'LIGHT' };
+
+  document.getElementById('exScaleLabel').textContent = labelMap[scale];
+  document.getElementById('exReps').textContent = mv.reps;
+  document.getElementById('exWeight').textContent = weight || 'Bodyweight';
+  document.getElementById('exPrescription').classList.add('show');
+}
+
 function applyTheme() {
   const root = document.documentElement;
   if (settings.theme === 'amoled') {
@@ -3619,6 +3851,162 @@ function deleteCustomWOD(id, e) {
   customWODs = customWODs.filter(w => w.id !== id);
   ALL_SESSIONS = [...WODS, ...WODS_EXTRA, ...MOBILITY, ...customWODs];
   localStorage.setItem('recompCustomWODs', JSON.stringify(customWODs));
+  renderAllSessions();
+}
+
+// ═══════════════════════════════
+// WOD GENERATOR
+// ═══════════════════════════════
+let genParams = { intensity: 'moderate', equip: new Set(['BARBELL', 'KETTLEBELL', 'DUMBBELLS']), focus: 'full' };
+
+function openGenerator() {
+  document.getElementById('genResults').classList.remove('show');
+  document.getElementById('genOverlay').classList.add('show');
+}
+
+function closeGenerator() {
+  document.getElementById('genOverlay').classList.remove('show');
+}
+
+function setGenOpt(field, value, btn) {
+  genParams[field] = value;
+  btn.parentElement.querySelectorAll('.gen-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function toggleGenEquip(equip, btn) {
+  if (equip === 'BODYWEIGHT') {
+    // Bodyweight only — clear everything else
+    genParams.equip = new Set(['BODYWEIGHT']);
+    btn.parentElement.querySelectorAll('.gen-opt').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    return;
+  }
+
+  // Remove bodyweight-only if selecting equipment
+  genParams.equip.delete('BODYWEIGHT');
+  const bwBtn = [...btn.parentElement.querySelectorAll('.gen-opt')].find(b => b.textContent.includes('BODYWEIGHT'));
+  if (bwBtn) bwBtn.classList.remove('active');
+
+  if (genParams.equip.has(equip)) {
+    genParams.equip.delete(equip);
+    btn.classList.remove('active');
+  } else {
+    genParams.equip.add(equip);
+    btn.classList.add('active');
+  }
+
+  // Must have at least one
+  if (genParams.equip.size === 0) {
+    genParams.equip.add('BODYWEIGHT');
+    if (bwBtn) bwBtn.classList.add('active');
+  }
+}
+
+// Movement tags for focus filtering
+const MOVEMENT_TAGS = {
+  'upper': ['Barbell Overhead Press', 'Dumbbell Renegade Rows', 'Kettlebell Clean & Press', 'Barbell Bent-Over Rows', 'Dumbbell Floor Press', 'Barbell Upright Rows', 'DB Curl to Press', 'Single-Arm KB Row', 'Single-Arm KB Press', 'Pull-Up Negatives', 'Push-Ups', 'Pike Push-Ups'],
+  'lower': ['Barbell Back Squats', 'Dumbbell Reverse Lunges', 'Kettlebell Goblet Squats', 'Jump Squats', 'Barbell Front Squats', 'Dumbbell Goblet Lunges', 'Bulgarian Split Squats', 'Pistol Squat Progression', 'KB Goblet Lateral Lunges', 'DB Weighted Step-ups'],
+  'posterior': ['Barbell Romanian Deadlifts', 'Barbell Deadlifts', 'Dumbbell Stiff-Leg Deadlifts', 'Barbell Glute Bridges', 'Glute Bridge (Bodyweight)', 'Single-Leg Romanian Deadlift', 'Barbell Good Mornings', 'Kettlebell Swings', 'KB American Swings', 'Hollow Body Hold'],
+  'metabolic': ['Barbell Thrusters', 'Dumbbell Devil\'s Press', 'KB American Swings', 'Burpees Over the Bar', 'Kettlebell Swings', 'Jump Squats', 'Mountain Climbers', 'Barbell Power Cleans']
+};
+
+function generateWODs() {
+  // Collect all movements from WODs
+  const pool = [];
+  [...WODS, ...WODS_EXTRA].forEach(wod => {
+    wod.movements.forEach(mv => {
+      if (!pool.some(p => p.name === mv.name)) pool.push(mv);
+    });
+  });
+
+  // Filter by equipment
+  const equipPool = pool.filter(mv => {
+    if (genParams.equip.has('BODYWEIGHT') && genParams.equip.size === 1) {
+      return mv.equip === 'BODYWEIGHT';
+    }
+    const mvEquip = mv.equip.toUpperCase();
+    return [...genParams.equip].some(e => mvEquip.includes(e)) || mvEquip === 'BODYWEIGHT';
+  });
+
+  // Filter by focus
+  let focusPool = equipPool;
+  if (genParams.focus !== 'full' && MOVEMENT_TAGS[genParams.focus]) {
+    const tags = new Set(MOVEMENT_TAGS[genParams.focus]);
+    const tagged = equipPool.filter(mv => tags.has(mv.name));
+    // If we have enough tagged movements, use them + fill with others
+    if (tagged.length >= 4) {
+      focusPool = tagged;
+    }
+  }
+
+  // Generate 3 options
+  const results = [];
+  const namePool = [
+    'The Crucible', 'Iron Will', 'No Excuses', 'Full Send', 'The Grinder',
+    'Sweat Equity', 'Burn Notice', 'The Gauntlet', 'Reckoning', 'Forge',
+    'Zero Hour', 'Pressure Test', 'The Standard', 'Ignition', 'Aftershock'
+  ];
+
+  for (let i = 0; i < 3; i++) {
+    const shuffled = [...focusPool].sort(() => Math.random() - 0.5);
+    const count = genParams.intensity === 'light' ? 4 : genParams.intensity === 'intense' ? 6 : 5;
+    const movements = shuffled.slice(0, Math.min(count, shuffled.length));
+
+    if (movements.length < 3) continue;
+
+    const nameIdx = Math.floor(Math.random() * namePool.length);
+    const name = namePool.splice(nameIdx, 1)[0];
+    const focusLabels = { full: 'Full Body', upper: 'Upper Body', lower: 'Lower Body', posterior: 'Posterior Chain', metabolic: 'Metabolic Conditioning' };
+
+    results.push({
+      name,
+      focus: `${focusLabels[genParams.focus]} · ${genParams.intensity.toUpperCase()} · ${movements.length} movements`,
+      movements
+    });
+  }
+
+  // Render results
+  const container = document.getElementById('genResults');
+  if (results.length === 0) {
+    container.innerHTML = '<div style="color:var(--muted2);font-family:DM Mono,monospace;font-size:11px;text-align:center;padding:16px;">Not enough movements match your filters. Try adding more equipment.</div>';
+  } else {
+    container.innerHTML = results.map((r, i) => `
+      <div class="gen-result-card" onclick="selectGeneratedWOD(${i})">
+        <div class="gen-result-name">"${r.name}"</div>
+        <div class="gen-result-focus">${r.focus}</div>
+        <div class="gen-result-mvs">${r.movements.map((m, j) => `${j + 1}. ${m.name} (${m.equip})`).join('<br>')}</div>
+      </div>`).join('');
+  }
+  container.classList.add('show');
+
+  // Stash results for selection
+  window._genResults = results;
+}
+
+function selectGeneratedWOD(idx) {
+  const r = window._genResults[idx];
+  if (!r) return;
+
+  const id = `gen_${Date.now()}`;
+  const wod = {
+    id,
+    name: `"${r.name}"`,
+    tag: 'GENERATED',
+    type: 'custom',
+    focus: r.focus,
+    color: '#ff5a3a',
+    day: 'ANY',
+    movements: r.movements.map(mv => ({ ...mv }))
+  };
+
+  // Add to custom WODs and persist
+  customWODs.push(wod);
+  ALL_SESSIONS = [...WODS, ...WODS_EXTRA, ...MOBILITY, ...customWODs];
+  localStorage.setItem('recompCustomWODs', JSON.stringify(customWODs));
+
+  closeGenerator();
+  selectSession(id);
   renderAllSessions();
 }
 
