@@ -391,8 +391,10 @@
   }
 
   .phase-label.work { color: var(--accent); }
-  .phase-label.rest { color: var(--accent3); }
-  .phase-label.round-rest { color: var(--accent2); }
+  .phase-label.rest { color: #5eead4; }
+  .phase-label.round-rest { color: #f472b6; }
+  .phase-label.countdown { color: #fff; animation: pulse-label 1s ease-in-out infinite; }
+  @keyframes pulse-label { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
 
   .timer-ring {
     position: relative;
@@ -1246,6 +1248,63 @@
   /* ── EXERCISE IMAGE in timer ── */
   /* TODO: Add exercise image panel styles here when implementing GIF follow-up.
      See TODO comment in timer HTML and EXERCISE_IMAGES map in JS section. */
+
+  /* ── REST PREVIEW (next movement) ── */
+  .rest-preview {
+    display: none;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 12px;
+    text-align: center;
+    animation: fadeInPreview 0.3s ease;
+  }
+  .rest-preview.show { display: block; }
+  @keyframes fadeInPreview { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .rest-preview-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .rest-preview-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .rest-preview-equip {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .rest-preview-imgs {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 8px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .rest-preview-imgs img {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s;
+  }
+  .rest-preview-imgs img.hidden { opacity: 0; }
+  .rest-preview-cue {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--muted2);
+    line-height: 1.4;
+  }
 
   /* ── MOBILITY CARD ── */
   .mobility-card {
@@ -2146,6 +2205,15 @@
         <div class="breathing-cue" id="beatBook"></div>
 
       </div>
+
+      <!-- Rest preview: next movement -->
+      <div class="rest-preview" id="restPreview">
+        <div class="rest-preview-label">UP NEXT</div>
+        <div class="rest-preview-name" id="restPreviewName"></div>
+        <div class="rest-preview-equip" id="restPreviewEquip"></div>
+        <div class="rest-preview-imgs" id="restPreviewImgs"></div>
+        <div class="rest-preview-cue" id="restPreviewCue"></div>
+      </div>
     </div>
 
     <!-- Sidebar: Movement List -->
@@ -2662,7 +2730,7 @@ let selectedFinisher = null;
 let workoutMode = 'circuit';
 let timerInterval = null;
 let isRunning = false;
-let currentPhase = 'work'; // 'work' | 'rest' | 'roundRest'
+let currentPhase = 'work'; // 'countdown' | 'work' | 'rest' | 'roundRest'
 let timeLeft = 45;
 let currentMovement = 0;
 let currentRound = 1;
@@ -2717,6 +2785,8 @@ function vibrate(pattern) {
 function tripleBeep() { beep(1200, 0.08); setTimeout(() => beep(1200, 0.08), 120); setTimeout(() => beep(1600, 0.15), 240); vibrate([100, 80, 100, 80, 200]); }
 function restBeep() { beep(600, 0.15); vibrate(150); }
 function countdownBeep() { beep(440, 0.06, 0.15); vibrate(50); }
+function restEndingBeep() { beep(800, 0.1, 0.25); vibrate(80); }
+function roundEndBeep() { beep(500, 0.12); setTimeout(() => beep(700, 0.12), 150); setTimeout(() => beep(500, 0.12), 300); vibrate([120, 60, 120, 60, 120]); }
 
 // ═══════════════════════════════
 // INIT
@@ -3018,6 +3088,7 @@ function resetTimerState() {
   totalElapsed = 0;
   document.getElementById('playPauseBtn').textContent = '▶ START';
   document.getElementById('beatBook').classList.remove('show');
+  hideRestPreview();
   updateTimerDisplay();
   updatePhaseUI();
   updateInlineTimerUI();
@@ -3034,7 +3105,20 @@ function toggleTimer() {
 }
 
 function startTimer() {
-  if (!sessionStartTime) sessionStartTime = Date.now();
+  if (!sessionStartTime) {
+    // First start — 3-2-1 countdown
+    sessionStartTime = Date.now();
+    currentPhase = 'countdown';
+    timeLeft = 3;
+    isRunning = true;
+    document.getElementById('playPauseBtn').textContent = '⏸ PAUSE';
+    lockRoundsIfRunning();
+    countdownBeep();
+    updateTimerDisplay();
+    updatePhaseUI();
+    timerInterval = setInterval(tick, 1000);
+    return;
+  }
   isRunning = true;
   document.getElementById('playPauseBtn').textContent = '⏸ PAUSE';
   lockRoundsIfRunning();
@@ -3048,11 +3132,37 @@ function pauseTimer() {
 }
 
 function tick() {
+  if (currentPhase === 'countdown') {
+    timeLeft--;
+    if (timeLeft > 0) {
+      countdownBeep();
+    } else {
+      // Countdown done — GO!
+      tripleBeep();
+      currentPhase = 'work';
+      timeLeft = settings.work;
+      updateMovementDisplay();
+      renderMovementList();
+      renderRoundDots();
+      updateTimerDisplay();
+      updatePhaseUI();
+      return;
+    }
+    updateTimerDisplay();
+    return;
+  }
+
   totalElapsed++;
   timeLeft--;
 
-  // Countdown beeps
-  if (timeLeft <= 3 && timeLeft > 0) countdownBeep();
+  // Countdown beeps at 3, 2, 1 — urgent tone when coming back from rest
+  if (timeLeft <= 3 && timeLeft > 0) {
+    if (currentPhase === 'rest' || currentPhase === 'roundRest') {
+      restEndingBeep();
+    } else {
+      countdownBeep();
+    }
+  }
 
   if (timeLeft <= 0) {
     nextPhase();
@@ -3064,16 +3174,16 @@ function tick() {
 
 function nextPhase() {
   if (currentPhase === 'work') {
-    tripleBeep();
-
     if (workoutMode === 'circuit') {
       // CIRCUIT: all movements → next round
       if (currentMovement < selectedWOD.movements.length - 1) {
+        tripleBeep();
         currentPhase = 'rest';
         timeLeft = settings.rest;
       } else {
         // End of all movements — go to next round or finish
         if (currentRound < settings.rounds) {
+          roundEndBeep();
           currentPhase = 'roundRest';
           timeLeft = settings.roundRest;
         } else {
@@ -3087,11 +3197,13 @@ function nextPhase() {
       // STATION: all rounds of this movement → next movement
       if (currentRound < settings.rounds) {
         // More rounds of this same movement
+        tripleBeep();
         currentPhase = 'rest';
         timeLeft = settings.rest;
       } else {
         // Done all rounds of this movement — move to next movement
         if (currentMovement < selectedWOD.movements.length - 1) {
+          roundEndBeep();
           currentPhase = 'roundRest';
           timeLeft = settings.roundRest;
         } else {
@@ -3103,10 +3215,12 @@ function nextPhase() {
         }
       }
     }
+    showRestPreview();
   } else if (currentPhase === 'rest') {
     restBeep();
     currentPhase = 'work';
     timeLeft = settings.work;
+    hideRestPreview();
 
     if (workoutMode === 'circuit') {
       currentMovement++;
@@ -3122,6 +3236,7 @@ function nextPhase() {
     tripleBeep();
     currentPhase = 'work';
     timeLeft = settings.work;
+    hideRestPreview();
 
     if (workoutMode === 'circuit') {
       currentRound++;
@@ -3142,13 +3257,27 @@ function nextPhase() {
 }
 
 function skipPhase() {
+  if (currentPhase === 'countdown') {
+    // Skip countdown — jump straight to work
+    tripleBeep();
+    currentPhase = 'work';
+    timeLeft = settings.work;
+    updateMovementDisplay();
+    renderMovementList();
+    renderRoundDots();
+    updateTimerDisplay();
+    updatePhaseUI();
+    return;
+  }
   timeLeft = 1;
 }
 
 function stopTimer() {
   clearInterval(timerInterval);
   isRunning = false;
-  if (currentRound > 1 || currentMovement > 0) {
+  if (currentPhase === 'countdown') {
+    resetTimerState();
+  } else if (currentRound > 1 || currentMovement > 0) {
     showComplete();
   } else {
     resetTimerState();
@@ -3160,7 +3289,8 @@ function updateTimerDisplay() {
   el.textContent = timeLeft;
 
   // Ring progress
-  const max = currentPhase === 'work' ? settings.work :
+  const max = currentPhase === 'countdown' ? 3 :
+              currentPhase === 'work' ? settings.work :
               currentPhase === 'rest' ? settings.rest : settings.roundRest;
   const pct = timeLeft / max;
   const circ = 603.19;
@@ -3168,7 +3298,9 @@ function updateTimerDisplay() {
   document.getElementById('ringProgress').style.strokeDashoffset = offset;
 
   // Round label — context-aware per mode
-  if (workoutMode === 'circuit') {
+  if (currentPhase === 'countdown') {
+    document.getElementById('roundLabel').textContent = 'GET READY';
+  } else if (workoutMode === 'circuit') {
     document.getElementById('roundLabel').textContent =
       `ROUND ${currentRound} / ${settings.rounds}`;
   } else {
@@ -3181,18 +3313,22 @@ function updatePhaseUI() {
   const label = document.getElementById('phaseLabel');
   const ring = document.getElementById('ringProgress');
 
-  if (currentPhase === 'work') {
+  if (currentPhase === 'countdown') {
+    label.textContent = 'STARTING IN';
+    label.className = 'phase-label countdown';
+    ring.style.stroke = '#fff';
+  } else if (currentPhase === 'work') {
     label.textContent = 'WORK';
     label.className = 'phase-label work';
     ring.style.stroke = selectedWOD ? selectedWOD.color : '#e8ff3a';
   } else if (currentPhase === 'rest') {
     label.textContent = 'REST';
     label.className = 'phase-label rest';
-    ring.style.stroke = '#3adfff';
+    ring.style.stroke = '#5eead4';
   } else {
     label.textContent = 'ROUND REST';
     label.className = 'phase-label round-rest';
-    ring.style.stroke = '#ff5a3a';
+    ring.style.stroke = '#f472b6';
   }
 }
 
@@ -3210,6 +3346,68 @@ function updatePhaseUI() {
 //   6. clearInterval on movement change and timer reset
 // All folder name mappings already drafted — see CONTEXT.md for the full map.
 // ═══════════════════════════════
+
+let restPreviewInterval = null;
+
+function showRestPreview() {
+  if (!selectedWOD) return;
+
+  // Determine the next movement index
+  let nextMvIdx;
+  if (workoutMode === 'circuit') {
+    if (currentPhase === 'rest') {
+      nextMvIdx = currentMovement + 1;
+    } else if (currentPhase === 'roundRest') {
+      nextMvIdx = 0; // back to first movement next round
+    }
+  } else {
+    // Station: roundRest means next movement
+    if (currentPhase === 'roundRest') {
+      nextMvIdx = currentMovement + 1;
+    }
+  }
+
+  if (nextMvIdx == null || nextMvIdx >= selectedWOD.movements.length) {
+    hideRestPreview();
+    return;
+  }
+
+  const mv = selectedWOD.movements[nextMvIdx];
+  const el = document.getElementById('restPreview');
+  document.getElementById('restPreviewName').textContent = mv.name;
+  document.getElementById('restPreviewEquip').textContent = mv.equip;
+  document.getElementById('restPreviewCue').textContent = mv.cue;
+
+  // Load demo images if available
+  const wrap = document.getElementById('restPreviewImgs');
+  const folder = EXERCISE_IMAGES[mv.name];
+  clearInterval(restPreviewInterval);
+
+  if (folder) {
+    const url0 = `${IMG_BASE}/${folder}/0.jpg`;
+    const url1 = `${IMG_BASE}/${folder}/1.jpg`;
+    wrap.innerHTML = `<img id="rpFrame0" src="${url0}" alt="${mv.name}"><img id="rpFrame1" src="${url1}" alt="${mv.name}" class="hidden">`;
+    wrap.style.display = '';
+    let showFirst = true;
+    restPreviewInterval = setInterval(() => {
+      showFirst = !showFirst;
+      const f0 = document.getElementById('rpFrame0');
+      const f1 = document.getElementById('rpFrame1');
+      if (f0) f0.classList.toggle('hidden', !showFirst);
+      if (f1) f1.classList.toggle('hidden', showFirst);
+    }, 900);
+  } else {
+    wrap.innerHTML = '';
+    wrap.style.display = 'none';
+  }
+
+  el.classList.add('show');
+}
+
+function hideRestPreview() {
+  clearInterval(restPreviewInterval);
+  document.getElementById('restPreview').classList.remove('show');
+}
 
 function updateMovementDisplay() {
   if (!selectedWOD) return;
