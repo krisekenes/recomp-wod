@@ -1,7 +1,7 @@
 {
   "name": "RECOMP — WOD Training System",
   "short_name": "RECOMP",
-  "description": "5-WOD recomposition training system with interval timer",
+  "description": "Recomposition training system with interval WODs, strength sessions, and workout logging",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#0a0a0a",

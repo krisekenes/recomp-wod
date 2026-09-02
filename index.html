@@ -2073,6 +2073,43 @@
     .stats-strip { grid-template-columns: repeat(2, 1fr); }
     .wod-grid { grid-template-columns: 1fr; }
   }
+  /* ── STRENGTH SESSION ── */
+  .strength-head { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:20px; margin-bottom:24px; }
+  .strength-back { justify-self:start; background:none; border:1px solid var(--border); color:var(--muted2); border-radius:7px; padding:9px 12px; font:10px 'DM Mono',monospace; letter-spacing:1px; cursor:pointer; }
+  .strength-title { font:32px 'Bebas Neue',sans-serif; letter-spacing:3px; text-align:center; }
+  .strength-kicker { font:10px 'DM Mono',monospace; letter-spacing:3px; color:var(--accent3); text-align:center; }
+  .strength-elapsed { justify-self:end; font:24px 'DM Mono',monospace; color:var(--accent3); }
+  .strength-layout { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:20px; max-width:1050px; margin:auto; }
+  .strength-main { display:flex; flex-direction:column; gap:16px; }
+  .strength-ex-card,.strength-set-card,.strength-rest-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:24px; }
+  .strength-progress { height:4px; background:var(--surface2); border-radius:4px; margin-bottom:24px; overflow:hidden; }
+  .strength-progress::after { content:''; display:block; width:var(--progress,0%); height:100%; background:var(--accent3); transition:width .25s; }
+  .strength-ex-card .strength-kicker { text-align:left; }
+  .strength-ex-name { font:34px 'Bebas Neue',sans-serif; letter-spacing:2px; margin:8px 0; }
+  .strength-target { font:13px 'DM Mono',monospace; color:var(--accent3); margin-bottom:12px; }
+  .strength-last { color:var(--muted2); font-size:10px; line-height:2.4; }
+  .strength-cue { color:var(--muted2); font-size:13px; line-height:1.5; margin-bottom:16px; }
+  .strength-sub-btn { margin-left:8px; }
+  .strength-set-header,.strength-set-row { display:grid; grid-template-columns:45px 1fr 1fr 60px; gap:10px; align-items:center; }
+  .strength-set-header { color:var(--muted2); font:9px 'DM Mono',monospace; letter-spacing:2px; padding:0 8px 8px; }
+  .strength-set-row { padding:9px 8px; border-top:1px solid var(--border); font:13px 'DM Mono',monospace; }
+  .strength-set-row.current { background:rgba(58,223,255,.06); border-radius:8px; border-color:var(--accent3); }
+  .strength-set-row.done { opacity:.55; }
+  .strength-set-input { min-width:0; width:100%; background:var(--surface2); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:9px; font:14px 'DM Mono',monospace; }
+  .strength-set-row.current .strength-set-input { border-color:var(--accent3); }
+  .strength-set-input.invalid { border-color:var(--accent2); box-shadow:0 0 0 2px rgba(255,90,58,.15); }
+  .strength-set-status { text-align:center; color:var(--accent3); font-size:18px; }
+  .strength-complete-btn { width:100%; margin-top:18px; border:0; border-radius:8px; padding:14px; background:var(--accent3); color:#000; font:16px 'Bebas Neue',sans-serif; letter-spacing:3px; cursor:pointer; }
+  .strength-complete-btn:disabled { opacity:.35; cursor:not-allowed; }
+  .strength-rest-card { display:none; align-items:center; justify-content:space-between; border-color:var(--accent2); }
+  .strength-rest-card.show { display:flex; }
+  .strength-rest-card .strength-kicker { text-align:left; color:var(--accent2); }
+  .strength-rest-time { font:38px 'Bebas Neue',sans-serif; color:var(--accent2); }
+  .strength-rest-actions { display:flex; gap:8px; }
+  .strength-rest-actions button { background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:9px; border-radius:6px; font:10px 'DM Mono',monospace; cursor:pointer; }
+  .strength-end { width:100%; margin-top:16px; }
+  .strength-log-detail { color:var(--muted2); font:10px 'DM Mono',monospace; margin-top:5px; line-height:1.5; }
+  @media(max-width:760px){ .strength-layout{grid-template-columns:1fr}.strength-layout .movement-list{position:static}.strength-head{grid-template-columns:1fr auto}.strength-head>div:nth-child(2){display:none}.strength-set-header,.strength-set-row{grid-template-columns:34px 1fr 1fr 36px}.strength-rest-card{align-items:flex-start;gap:12px;flex-direction:column}.strength-rest-actions{width:100%}.strength-rest-actions button{flex:1} }
 </style>
 </head>
 <body>
@@ -2104,11 +2141,13 @@
   <div class="cat-filter">
     <button class="cat-btn active" data-cat="all" onclick="filterCat('all',this)">ALL</button>
     <button class="cat-btn" data-cat="wod" onclick="filterCat('wod',this)">WODs 1–5</button>
+    <button class="cat-btn" data-cat="strength" onclick="filterCat('strength',this)">STRENGTH</button>
     <button class="cat-btn" data-cat="extra" onclick="filterCat('extra',this)">EXTRA</button>
     <button class="cat-btn" data-cat="mobility" onclick="filterCat('mobility',this)">MOBILITY</button>
     <button class="cat-btn" data-cat="deload" onclick="filterCat('deload',this)">DELOAD</button>
     <button class="cat-btn" data-cat="custom" onclick="filterCat('custom',this)">CUSTOM</button>
     <button class="cat-btn" style="background:var(--accent3);color:#000;border-color:var(--accent3);" onclick="openBuilder()">+ BUILD</button>
+    <button class="cat-btn" style="background:#3adfff;color:#000;border-color:#3adfff;" onclick="openBuilder('strength')">+ BUILD STRENGTH</button>
     <button class="cat-btn" style="background:var(--accent2);color:#000;border-color:var(--accent2);" onclick="openGenerator()">⚡ GENERATE</button>
   </div>
   <div class="wod-grid" id="wodGrid"></div>
@@ -2223,6 +2262,47 @@
 
       <div class="round-dots" id="roundDots"></div>
     </div>
+  </div>
+</div>
+
+<!-- Strength session workspace -->
+<div class="view" id="view-strength">
+  <div class="strength-head">
+    <button class="strength-back" onclick="exitStrengthSession()">← WORKOUTS</button>
+    <div>
+      <div class="strength-kicker" id="strengthTag">STRENGTH</div>
+      <div class="strength-title" id="strengthTitle">—</div>
+    </div>
+    <div class="strength-elapsed" id="strengthElapsed">0:00</div>
+  </div>
+  <div class="strength-layout">
+    <main class="strength-main">
+      <section class="strength-ex-card">
+        <div class="strength-progress" id="strengthProgress"></div>
+        <div class="strength-kicker">CURRENT EXERCISE</div>
+        <div class="strength-ex-name" id="strengthExName">—</div>
+        <div class="strength-target" id="strengthTarget"></div>
+        <div class="strength-cue" id="strengthCue"></div>
+        <button class="ex-demo-btn" id="strengthDemoBtn" onclick="openStrengthDemo()">? HOW TO DO THIS</button>
+        <button class="ex-demo-btn strength-sub-btn" id="strengthSubBtn" onclick="cycleStrengthSubstitution()">↔ SUBSTITUTE</button>
+      </section>
+      <section class="strength-set-card">
+        <div class="strength-set-header"><span>SET</span><span>WEIGHT (LB)</span><span>REPS</span><span>STATUS</span></div>
+        <div id="strengthSetRows"></div>
+        <button class="strength-complete-btn" id="strengthCompleteBtn" onclick="completeStrengthSet()">COMPLETE SET</button>
+      </section>
+      <section class="strength-rest-card" id="strengthRestCard">
+        <div><div class="strength-kicker">REST</div><div class="strength-rest-time" id="strengthRestTime">2:00</div></div>
+        <div class="strength-rest-actions">
+          <button onclick="adjustStrengthRest(-30)">−30s</button><button onclick="skipStrengthRest()">SKIP</button><button onclick="adjustStrengthRest(30)">+30s</button>
+        </div>
+      </section>
+    </main>
+    <aside class="movement-list">
+      <div class="movement-list-title">EXERCISES</div>
+      <div id="strengthExerciseList"></div>
+      <button class="ctrl-btn danger strength-end" onclick="finishStrengthSession(true)">END SESSION</button>
+    </aside>
   </div>
 </div>
 
@@ -2437,8 +2517,8 @@
 <!-- Custom WOD Builder Overlay -->
 <div class="builder-overlay" id="builderOverlay">
   <div class="builder-card">
-    <div class="builder-title">BUILD YOUR WOD</div>
-    <div class="builder-subtitle">PICK UP TO 6 MOVEMENTS</div>
+    <div class="builder-title" id="builderTitle">BUILD YOUR WOD</div>
+    <div class="builder-subtitle" id="builderSubtitle">PICK UP TO 6 MOVEMENTS</div>
     <input class="builder-name-input" id="builderName" type="text" placeholder="WOD name (e.g. &quot;Leg Day&quot;)" maxlength="30">
     <div class="builder-pool-label">SELECTED (<span id="builderCount">0</span>/6)</div>
     <div class="builder-selected" id="builderSelected"></div>
@@ -2618,7 +2698,7 @@ const WODS_EXTRA = [
     id: 6,
     name: '"The Asymmetry"',
     tag: 'WOD 06',
-    type: 'strength',
+    type: 'unilateral',
     focus: 'Unilateral Strength & Imbalance Correction',
     color: '#3affa0',
     day: 'ALT',
@@ -2709,16 +2789,59 @@ const MOBILITY = [
   }
 ];
 
+const STRENGTH_WORKOUTS = [
+  {
+    id:'strength_a', type:'strength', tag:'STRENGTH A', name:'"The Base"', focus:'Squat · Push · Pull · Hinge · Core', color:'#3adfff', day:'MON',
+    movements:[
+      { name:'Barbell Back Squats', equip:'BARBELL', cue:'Brace hard before every rep. Keep the bar over mid-foot and drive evenly through both feet.', sets:4, reps:'6-8', rest:150, rx:{m:'135lb / 61kg',w:'95lb / 43kg'}, scaled:{m:'95lb / 43kg',w:'65lb / 29kg'}, light:{m:'65lb / 29kg',w:'45lb / 20kg'} },
+      { name:'Dumbbell Floor Press', equip:'DUMBBELLS', cue:'Pause the upper arms gently on the floor. Keep wrists stacked and press without bouncing.', sets:4, reps:'8-10', rest:120, rx:{m:'40lb / 18kg ea',w:'25lb / 11kg ea'}, scaled:{m:'25lb / 11kg ea',w:'15lb / 7kg ea'}, light:{m:'15lb / 7kg ea',w:'10lb / 5kg ea'} },
+      { name:'Barbell Bent-Over Rows', equip:'BARBELL', cue:'Lock the torso in place. Pull toward the lower ribs and control the lowering phase.', sets:4, reps:'8-10', rest:120, rx:{m:'95lb / 43kg',w:'65lb / 29kg'}, scaled:{m:'65lb / 29kg',w:'45lb / 20kg'}, light:{m:'45lb / 20kg',w:'35lb / 16kg'} },
+      { name:'Barbell Romanian Deadlifts', equip:'BARBELL', cue:'Push the hips back with soft knees. Stop when hamstring tension peaks; do not chase the floor.', sets:3, reps:'8-10', rest:120, rx:{m:'135lb / 61kg',w:'95lb / 43kg'}, scaled:{m:'95lb / 43kg',w:'65lb / 29kg'}, light:{m:'65lb / 29kg',w:'45lb / 20kg'} },
+      { name:'Hollow Body Hold', equip:'BODYWEIGHT', cue:'Press the lower back into the floor. Shorten the lever if the back begins to arch.', sets:3, reps:'30-45 sec', rest:60 }
+    ]
+  },
+  {
+    id:'strength_b', type:'strength', tag:'STRENGTH B', name:'"The Pull"', focus:'Deadlift · Press · Single Leg · Back · Carry', color:'#b03aff', day:'WED',
+    movements:[
+      { name:'Barbell Deadlifts', equip:'BARBELL', cue:'Take the slack out of the bar, brace, then push the floor away. Reset between reps.', sets:4, reps:'4-6', rest:180, rx:{m:'185lb / 84kg',w:'125lb / 57kg'}, scaled:{m:'135lb / 61kg',w:'95lb / 43kg'}, light:{m:'95lb / 43kg',w:'65lb / 29kg'} },
+      { name:'Barbell Overhead Press', equip:'BARBELL', cue:'Squeeze glutes and ribs down. Move the head through once the bar clears the forehead.', sets:4, reps:'6-8', rest:150, rx:{m:'75lb / 34kg',w:'45lb / 20kg'}, scaled:{m:'55lb / 25kg',w:'35lb / 16kg'}, light:{m:'45lb / 20kg',w:'25lb / 11kg'} },
+      { name:'Bulgarian Split Squats', equip:'DUMBBELLS', cue:'Keep most of your weight on the front leg. Descend under control and drive through the whole foot.', sets:3, reps:'8 each', rest:120, rx:{m:'35lb / 16kg ea',w:'20lb / 9kg ea'}, scaled:{m:'20lb / 9kg ea',w:'12lb / 5kg ea'}, light:{m:'Bodyweight',w:'Bodyweight'} },
+      { name:'Single-Arm KB Row', equip:'KETTLEBELL', cue:'Keep hips square. Pull the elbow toward the back pocket without rotating the torso.', sets:3, reps:'10 each', rest:90, rx:{m:'53lb / 24kg',w:'35lb / 16kg'}, scaled:{m:'35lb / 16kg',w:'26lb / 12kg'}, light:{m:'26lb / 12kg',w:'18lb / 8kg'} },
+      { name:'KB Suitcase Carry', equip:'KETTLEBELL', cue:'Walk tall without leaning toward or away from the bell. Switch hands each set.', sets:3, reps:'40yd each', rest:75, rx:{m:'70lb / 32kg',w:'53lb / 24kg'}, scaled:{m:'53lb / 24kg',w:'35lb / 16kg'}, light:{m:'35lb / 16kg',w:'26lb / 12kg'} }
+    ]
+  },
+  {
+    id:'strength_c', type:'strength', tag:'STRENGTH C', name:'"The Build"', focus:'Front Squat · Press · Glutes · Row · Core', color:'#3affa0', day:'SAT',
+    movements:[
+      { name:'Barbell Front Squats', equip:'BARBELL', cue:'Keep elbows high and torso tall. Brace before descending and own the bottom position.', sets:4, reps:'6-8', rest:150, rx:{m:'115lb / 52kg',w:'75lb / 34kg'}, scaled:{m:'75lb / 34kg',w:'55lb / 25kg'}, light:{m:'55lb / 25kg',w:'35lb / 16kg'} },
+      { name:'Dumbbell Floor Press', equip:'DUMBBELLS', cue:'Use a neutral or comfortable grip. Pause briefly on the floor before every press.', sets:4, reps:'8-12', rest:120, rx:{m:'40lb / 18kg ea',w:'25lb / 11kg ea'}, scaled:{m:'25lb / 11kg ea',w:'15lb / 7kg ea'}, light:{m:'15lb / 7kg ea',w:'10lb / 5kg ea'} },
+      { name:'Barbell Glute Bridges', equip:'BARBELL', cue:'Tuck the pelvis slightly and finish with the glutes, not the lower back.', sets:4, reps:'10-12', rest:120, rx:{m:'155lb / 70kg',w:'105lb / 48kg'}, scaled:{m:'105lb / 48kg',w:'75lb / 34kg'}, light:{m:'75lb / 34kg',w:'45lb / 20kg'} },
+      { name:'Dumbbell Renegade Rows', equip:'DUMBBELLS', cue:'Widen the feet and keep hips square. Row without shifting weight side to side.', sets:3, reps:'8 each', rest:90, rx:{m:'35lb / 16kg ea',w:'20lb / 9kg ea'}, scaled:{m:'20lb / 9kg ea',w:'12lb / 5kg ea'}, light:{m:'12lb / 5kg ea',w:'8lb / 4kg ea'} },
+      { name:'Weighted Russian Twists', equip:'DUMBBELL', cue:'Rotate through the upper back while keeping the pelvis stable. Move with control.', sets:3, reps:'12 each', rest:60, rx:{m:'25lb / 11kg',w:'15lb / 7kg'}, scaled:{m:'15lb / 7kg',w:'10lb / 5kg'}, light:{m:'Bodyweight',w:'Bodyweight'} }
+    ]
+  },
+  {
+    id:'strength_d', type:'strength', tag:'STRENGTH D', name:'"The Big Three"', focus:'Squat · Bench Press · Deadlift · Pull · Legs', color:'#ff9f3a', day:'ANY',
+    movements:[
+      { name:'Barbell Back Squats', equip:'BARBELL + RACK', cue:'Brace before you unrack and before every rep. Keep the bar over mid-foot and drive up with hips and chest together.', sets:5, reps:'5', rest:180, rx:{m:'155lb / 70kg',w:'105lb / 48kg'}, scaled:{m:'115lb / 52kg',w:'75lb / 34kg'}, light:{m:'75lb / 34kg',w:'55lb / 25kg'} },
+      { name:'Barbell Bench Press', equip:'BARBELL + BENCH', cue:'Plant your feet, pin the shoulder blades back, and lower the bar under control to the lower chest. Use a spotter or safety arms.', sets:5, reps:'5', rest:180, rx:{m:'115lb / 52kg',w:'65lb / 29kg'}, scaled:{m:'75lb / 34kg',w:'45lb / 20kg'}, light:{m:'45lb / 20kg',w:'35lb / 16kg'} },
+      { name:'Barbell Deadlifts', equip:'BARBELL', cue:'Take the slack out of the bar and brace before pushing the floor away. These are three crisp working sets—not a conditioning piece.', sets:3, reps:'5', rest:210, rx:{m:'185lb / 84kg',w:'125lb / 57kg'}, scaled:{m:'135lb / 61kg',w:'95lb / 43kg'}, light:{m:'95lb / 43kg',w:'65lb / 29kg'} },
+      { name:'Pull-Ups', equip:'PULL-UP BAR', cue:'Start from a controlled hang, drive the elbows toward the ribs, and avoid swinging. Use a band or controlled negatives as needed.', sets:3, reps:'5-8', rest:120, rx:{m:'Bodyweight',w:'Bodyweight'}, scaled:{m:'Band assisted',w:'Band assisted'}, light:{m:'Negatives',w:'Negatives'} },
+      { name:'Dumbbell Walking Lunges', equip:'DUMBBELLS', cue:'Take a long, stable step and lower the back knee under control. Drive through the front foot and keep the torso tall.', sets:3, reps:'10 each', rest:90, rx:{m:'35lb / 16kg ea',w:'20lb / 9kg ea'}, scaled:{m:'20lb / 9kg ea',w:'12lb / 5kg ea'}, light:{m:'Bodyweight',w:'Bodyweight'} }
+    ]
+  }
+];
+
 let customWODs = JSON.parse(localStorage.getItem('recompCustomWODs') || '[]');
-let ALL_SESSIONS = [...WODS, ...WODS_EXTRA, ...MOBILITY, ...customWODs];
+let ALL_SESSIONS = [...WODS, ...STRENGTH_WORKOUTS, ...WODS_EXTRA, ...MOBILITY, ...customWODs];
 
 const SCHEDULE = [
-  { day: 'MON', wod: 1, type: 'wod' },
+  { day: 'MON', wod: 'strength_a', type: 'strength' },
   { day: 'TUE', wod: 2, type: 'wod' },
-  { day: 'WED', wod: 3, type: 'wod' },
+  { day: 'WED', wod: 'strength_b', type: 'strength' },
   { day: 'THU', wod: 'mob1', type: 'mobility', label: 'MOBILITY' },
   { day: 'FRI', wod: 4, type: 'wod' },
-  { day: 'SAT', wod: 5, type: 'wod' },
+  { day: 'SAT', wod: 'strength_c', type: 'strength' },
   { day: 'SUN', wod: 'mob2', type: 'mobility', label: 'MOBILITY' }
 ];
 
@@ -2819,6 +2942,7 @@ function init() {
   setGender(settings.gender || 'm');
   setScale(settings.scale || 'rx');
   setMode(workoutMode);
+  restoreStrengthDraft();
 }
 
 let activeFilter = 'all';
@@ -2851,8 +2975,8 @@ function renderSchedule() {
   const dayNames = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
   const container = document.getElementById('todaySuggestion');
 
-  if (todaySchedule.type === 'wod') {
-    const wod = WODS.find(w => w.id === todaySchedule.wod);
+  if (todaySchedule.type === 'wod' || todaySchedule.type === 'strength') {
+    const wod = ALL_SESSIONS.find(w => String(w.id) === String(todaySchedule.wod));
     if (wod) {
       container.innerHTML = `
         <div class="today-suggestion" onclick="selectSession('${wod.id}')">
@@ -2886,9 +3010,11 @@ function renderAllSessions() {
   let sessions = [];
 
   if (activeFilter === 'all') {
-    sessions = [...WODS, ...WODS_EXTRA, ...MOBILITY, ...customWODs];
+    sessions = [...WODS, ...STRENGTH_WORKOUTS, ...WODS_EXTRA, ...MOBILITY, ...customWODs];
   } else if (activeFilter === 'wod') {
     sessions = [...WODS];
+  } else if (activeFilter === 'strength') {
+    sessions = [...STRENGTH_WORKOUTS];
   } else if (activeFilter === 'extra') {
     sessions = [...WODS_EXTRA];
   } else if (activeFilter === 'mobility') {
@@ -2900,14 +3026,14 @@ function renderAllSessions() {
   }
 
   grid.innerHTML = sessions.map(s => {
+    if (customWODs.some(w => w.id === s.id)) return renderCustomCard(s);
     if (s.type === 'mobility') return renderMobilityCard(s);
-    if (s.type === 'custom') return renderCustomCard(s);
     return renderWodCard(s);
   }).join('');
 }
 
 function renderWodCard(w) {
-  const typeLabel = w.type === 'deload' ? 'DELOAD' : w.type === 'strength' ? 'UNILATERAL' : 'WOD';
+  const typeLabel = w.type === 'deload' ? 'DELOAD' : w.type === 'strength' ? 'STRENGTH' : w.type === 'unilateral' ? 'UNILATERAL' : 'WOD';
   return `
     <div class="wod-card" id="card-${w.id}" style="--card-color:${w.color}" onclick="selectSession('${w.id}')">
       <div class="wod-number">${w.id}</div>
@@ -2915,7 +3041,7 @@ function renderWodCard(w) {
       <div class="wod-name">${w.name}</div>
       <div class="wod-focus">${w.focus}</div>
       <div class="wod-movements">
-        ${w.movements.map(m => `<div class="wod-movement-item">${m.name}</div>`).join('')}
+        ${w.movements.map(m => `<div class="wod-movement-item">${m.name}${w.type === 'strength' ? ` · ${m.sets} × ${m.reps}` : ''}</div>`).join('')}
       </div>
       <div class="wod-card-actions">
         <button class="wod-quick-start" onclick="quickStart('${w.id}', event)">▶ GO</button>
@@ -2945,11 +3071,11 @@ function renderMobilityCard(m) {
 function renderCustomCard(w) {
   return `
     <div class="wod-card" id="card-${w.id}" style="--card-color:${w.color}" onclick="selectSession('${w.id}')">
-      <div class="wod-tag">CUSTOM</div>
+      <div class="wod-tag">${w.tag || 'CUSTOM'}</div>
       <div class="wod-name">${w.name}</div>
       <div class="wod-focus">${w.focus}</div>
       <div class="wod-movements">
-        ${w.movements.map(m => `<div class="wod-movement-item">${m.name}</div>`).join('')}
+        ${w.movements.map(m => `<div class="wod-movement-item">${m.name}${w.type === 'strength' ? ` · ${m.sets} × ${m.reps}` : ''}</div>`).join('')}
       </div>
       <div class="wod-card-actions">
         <button class="wod-quick-start" onclick="quickStart('${w.id}', event)">▶ GO</button>
@@ -3015,7 +3141,7 @@ function selectSession(id) {
   const bar = document.getElementById('startBar');
   bar.classList.add('show');
 
-  const prefix = session.type === 'mobility' ? '🧘 BEGIN' : session.type === 'deload' ? '🔄 START' : '▶ START';
+  const prefix = session.type === 'mobility' ? '🧘 BEGIN' : session.type === 'deload' ? '🔄 START' : session.type === 'strength' ? '🏋 START' : '▶ START';
   btn.textContent = `${prefix} ${session.name}`;
   btn.style.background = session.color;
   btn.style.color = '#000';
@@ -3471,6 +3597,236 @@ function renderRoundDots() {
     }).join('');
 }
 
+// ═══════════════════════════════
+// STRENGTH SESSION
+// ═══════════════════════════════
+const STRENGTH_DRAFT_KEY = 'recompStrengthDraft';
+const STRENGTH_SUBSTITUTIONS = {
+  'Barbell Back Squats': [{name:'Barbell Front Squats',equip:'BARBELL + RACK',cue:'Keep elbows high and torso tall; use a load you can control.'},{name:'Kettlebell Goblet Squats',equip:'KETTLEBELL',cue:'Hold the bell at chest height and keep the whole foot planted.'}],
+  'Barbell Front Squats': [{name:'Barbell Back Squats',equip:'BARBELL + RACK',cue:'Brace hard and keep the bar over mid-foot.'},{name:'Kettlebell Goblet Squats',equip:'KETTLEBELL',cue:'Stay tall and pause under control at the bottom.'}],
+  'Barbell Bench Press': [{name:'Dumbbell Floor Press',equip:'DUMBBELLS',cue:'Pause the upper arms softly on the floor and press with stacked wrists.'}],
+  'Dumbbell Floor Press': [{name:'Barbell Bench Press',equip:'BARBELL + BENCH',cue:'Use safety arms or a spotter; lower under control to the lower chest.'},{name:'Push-Ups',equip:'BODYWEIGHT',cue:'Keep ribs down and move the chest and hips as one unit.'}],
+  'Barbell Deadlifts': [{name:'Barbell Romanian Deadlifts',equip:'BARBELL',cue:'Push the hips back and stop at peak hamstring tension.'},{name:'Kettlebell Swings',equip:'KETTLEBELL',cue:'Use a crisp hip hinge; choose a moderate load and keep reps controlled.'}],
+  'Pull-Ups': [{name:'Pull-Up Negatives',equip:'PULL-UP BAR',cue:'Start at the top and lower for five to eight controlled seconds.'},{name:'Single-Arm KB Row',equip:'KETTLEBELL',cue:'Keep hips square and pull the elbow toward the back pocket.'}]
+};
+let strengthState = null;
+let strengthClockInterval = null;
+let strengthRestInterval = null;
+
+function startStrengthSession() {
+  if (!selectedWOD || selectedWOD.type !== 'strength') return;
+  clearInterval(strengthClockInterval);
+  clearInterval(strengthRestInterval);
+  strengthState = { exerciseIndex:0, setIndex:0, completedSets:[], substitutions:{}, startedAt:Date.now(), restLeft:0, pendingAdvance:false };
+  document.getElementById('strengthTitle').textContent = selectedWOD.name;
+  document.getElementById('strengthTag').textContent = selectedWOD.tag;
+  showView('strength');
+  renderStrengthSession();
+  updateStrengthElapsed();
+  strengthClockInterval = setInterval(updateStrengthElapsed, 1000);
+  saveStrengthDraft();
+  window.scrollTo({top:0});
+}
+
+function updateStrengthElapsed() {
+  if (!strengthState) return;
+  const seconds = Math.floor((Date.now() - strengthState.startedAt) / 1000);
+  document.getElementById('strengthElapsed').textContent = formatClock(seconds);
+}
+
+function formatClock(seconds) {
+  const safe = Math.max(0, seconds);
+  return `${Math.floor(safe / 60)}:${String(safe % 60).padStart(2,'0')}`;
+}
+
+function getLastStrengthSet(exerciseName, setIndex) {
+  const previous = workoutLog.find(e => e.type === 'strength' && e.wod === selectedWOD.id);
+  return previous?.exercises?.find(e => e.name === exerciseName)?.sets?.filter(s => !s.warmup)?.[setIndex] || null;
+}
+
+function getStrengthPlan(exercise) {
+  const warmups = exercise.warmupSets ?? (exercise.equip.includes('BARBELL') ? 2 : 0);
+  return [
+    ...Array.from({length:warmups}, (_,i) => ({warmup:true, label:`W${i+1}`})),
+    ...Array.from({length:exercise.sets}, (_,i) => ({warmup:false, label:String(i+1), workingIndex:i}))
+  ];
+}
+
+function getActiveStrengthExercise(index = strengthState.exerciseIndex) {
+  const base = selectedWOD.movements[index];
+  const choice = strengthState?.substitutions?.[index] || 0;
+  if (!choice) return base;
+  return {...base, ...STRENGTH_SUBSTITUTIONS[base.name]?.[choice - 1]};
+}
+
+function cycleStrengthSubstitution() {
+  const index = strengthState.exerciseIndex;
+  const options = STRENGTH_SUBSTITUTIONS[selectedWOD.movements[index].name] || [];
+  strengthState.substitutions ||= {};
+  strengthState.substitutions[index] = ((strengthState.substitutions[index] || 0) + 1) % (options.length + 1);
+  saveStrengthDraft(); renderStrengthSession();
+}
+
+function getProgressionHint(exercise) {
+  const previous = workoutLog.find(e => e.type === 'strength' && e.wod === selectedWOD.id && Array.isArray(e.exercises));
+  const sets = previous?.exercises.find(e => e.name === exercise.name)?.sets?.filter(s => !s.warmup && s.reps != null) || [];
+  const top = Number(String(exercise.reps).match(/\d+$/)?.[0]);
+  if (sets.length === exercise.sets && top && sets.every(s => s.reps >= top) && sets.every(s => s.weight != null)) {
+    const load = Math.max(...sets.map(s => s.weight));
+    return `PROGRESSION: last time you hit the top of the range — consider ${load + 5} lb.`;
+  }
+  return sets.length ? `LAST SESSION: ${sets.map(s => `${s.reps ?? '—'} @ ${s.weight ?? '—'} lb`).join(' · ')}` : 'NO PREVIOUS SETS — START CONSERVATIVELY';
+}
+
+function renderStrengthSession() {
+  if (!strengthState) return;
+  const baseExercise = selectedWOD.movements[strengthState.exerciseIndex];
+  const exercise = getActiveStrengthExercise();
+  const completedForExercise = strengthState.completedSets.filter(s => s.exerciseIndex === strengthState.exerciseIndex);
+  const plan = getStrengthPlan(baseExercise);
+  const totalSets = selectedWOD.movements.reduce((sum,m) => sum + m.sets, 0);
+  const completedWorking = strengthState.completedSets.filter(s => !s.warmup).length;
+  const progress = Math.round((completedWorking / totalSets) * 100);
+  const scale = settings.scale || 'rx';
+  const gender = settings.gender || 'm';
+  const prescribed = exercise[scale] && typeof exercise[scale] === 'object' ? exercise[scale][gender] : exercise[scale];
+
+  document.getElementById('strengthProgress').style.setProperty('--progress', `${progress}%`);
+  document.getElementById('strengthExName').textContent = exercise.name;
+  document.getElementById('strengthTarget').innerHTML = `${baseExercise.sets} SETS × ${baseExercise.reps} · ${Math.floor(baseExercise.rest/60)}:${String(baseExercise.rest%60).padStart(2,'0')} REST${prescribed ? ` · ${prescribed}` : ''}<br><span class="strength-last">${getProgressionHint(baseExercise)}</span>`;
+  document.getElementById('strengthCue').textContent = exercise.cue;
+  document.getElementById('strengthDemoBtn').style.display = EXERCISE_IMAGES[exercise.name] ? '' : 'none';
+  const substitutions = STRENGTH_SUBSTITUTIONS[baseExercise.name] || [];
+  const choice = strengthState.substitutions?.[strengthState.exerciseIndex] || 0;
+  document.getElementById('strengthSubBtn').style.display = substitutions.length ? '' : 'none';
+  document.getElementById('strengthSubBtn').textContent = choice ? `↔ USING ${exercise.name.toUpperCase()}` : '↔ SUBSTITUTE';
+
+  document.getElementById('strengthSetRows').innerHTML = plan.map((setPlan,i) => {
+    const done = completedForExercise.find(s => s.setIndex === i);
+    const last = setPlan.warmup ? null : getLastStrengthSet(baseExercise.name, setPlan.workingIndex);
+    const current = i === strengthState.setIndex && !done;
+    return `<div class="strength-set-row${done ? ' done' : ''}${current ? ' current' : ''}">
+      <span>${setPlan.label}</span>
+      <input class="strength-set-input" id="strengthWeight${i}" type="number" min="0" step="2.5" inputmode="decimal" aria-label="Weight for set ${i+1}" value="${done?.weight ?? (current && last ? last.weight : '')}" placeholder="${last?.weight ?? '—'}" ${current ? '' : 'disabled'}>
+      <input class="strength-set-input" id="strengthReps${i}" type="number" min="0" inputmode="numeric" aria-label="Reps for set ${i+1}" value="${done?.reps ?? ''}" placeholder="${last?.reps ?? exercise.reps}" ${current ? '' : 'disabled'}>
+      <span class="strength-set-status">${done ? '✓' : current ? '●' : '○'}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('strengthCompleteBtn').disabled = strengthState.restLeft > 0;
+  renderStrengthExerciseList();
+}
+
+function renderStrengthExerciseList() {
+  document.getElementById('strengthExerciseList').innerHTML = selectedWOD.movements.map((exercise,i) => {
+    const count = strengthState.completedSets.filter(s => s.exerciseIndex === i && !s.warmup).length;
+    const done = count === exercise.sets;
+    return `<div class="movement-item${i === strengthState.exerciseIndex ? ' active' : ''}${done ? ' done' : ''}">
+      <div class="mv-num">${i+1}</div><div class="mv-info"><div class="mv-name">${exercise.name}</div><div class="mv-equip">${count}/${exercise.sets} SETS</div></div><div class="mv-check">${done ? '✓' : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function completeStrengthSet() {
+  if (!strengthState || strengthState.restLeft > 0) return;
+  const exercise = selectedWOD.movements[strengthState.exerciseIndex];
+  const setIndex = strengthState.setIndex;
+  const plan = getStrengthPlan(exercise);
+  const setPlan = plan[setIndex];
+  const weightInput = document.getElementById(`strengthWeight${setIndex}`);
+  const repsInput = document.getElementById(`strengthReps${setIndex}`);
+  const weight = weightInput.value === '' ? null : Number(weightInput.value);
+  const reps = repsInput.value === '' ? null : Number(repsInput.value);
+  if (reps == null || reps <= 0) { repsInput.focus(); repsInput.classList.add('invalid'); return; }
+  strengthState.completedSets.push({ exerciseIndex:strengthState.exerciseIndex, setIndex, warmup:setPlan.warmup, exerciseName:getActiveStrengthExercise().name, weight, reps, unit:'lb' });
+
+  const lastSet = setIndex >= plan.length - 1;
+  const lastExercise = strengthState.exerciseIndex >= selectedWOD.movements.length - 1;
+  if (lastSet && lastExercise) { finishStrengthSession(false); return; }
+  strengthState.pendingAdvance = lastSet;
+  if (!lastSet) strengthState.setIndex++;
+  startStrengthRest(setPlan.warmup ? Math.min(60, exercise.rest) : exercise.rest);
+  saveStrengthDraft();
+  renderStrengthSession();
+}
+
+function startStrengthRest(seconds) {
+  clearInterval(strengthRestInterval);
+  strengthState.restLeft = seconds;
+  document.getElementById('strengthRestCard').classList.add('show');
+  updateStrengthRestDisplay();
+  restBeep();
+  strengthRestInterval = setInterval(() => {
+    strengthState.restLeft--;
+    if (strengthState.restLeft <= 3 && strengthState.restLeft > 0) restEndingBeep();
+    if (strengthState.restLeft <= 0) endStrengthRest(); else updateStrengthRestDisplay();
+  }, 1000);
+}
+
+function updateStrengthRestDisplay() { document.getElementById('strengthRestTime').textContent = formatClock(strengthState?.restLeft || 0); }
+function adjustStrengthRest(delta) { if (!strengthState) return; strengthState.restLeft = Math.max(0, strengthState.restLeft + delta); if (!strengthState.restLeft) endStrengthRest(); else updateStrengthRestDisplay(); }
+function skipStrengthRest() { if (strengthState) endStrengthRest(); }
+
+function endStrengthRest() {
+  clearInterval(strengthRestInterval);
+  strengthState.restLeft = 0;
+  document.getElementById('strengthRestCard').classList.remove('show');
+  if (strengthState.pendingAdvance) {
+    strengthState.exerciseIndex++;
+    strengthState.setIndex = 0;
+    strengthState.pendingAdvance = false;
+  }
+  tripleBeep();
+  saveStrengthDraft();
+  renderStrengthSession();
+}
+
+function openStrengthDemo() { openExDemo(getActiveStrengthExercise()); }
+
+function finishStrengthSession(early) {
+  if (!strengthState || (early && strengthState.completedSets.length === 0)) { exitStrengthSession(); return; }
+  clearInterval(strengthClockInterval); clearInterval(strengthRestInterval);
+  const duration = Math.max(1, Math.floor((Date.now() - strengthState.startedAt) / 60000));
+  const exercises = selectedWOD.movements.map((exercise,i) => ({
+    name:strengthState.completedSets.find(s => s.exerciseIndex === i)?.exerciseName || exercise.name,
+    sets:strengthState.completedSets.filter(s => s.exerciseIndex === i).sort((a,b) => a.setIndex-b.setIndex).map(({weight,reps,unit,warmup}) => ({weight,reps,unit,warmup:!!warmup}))
+  })).filter(e => e.sets.length);
+  const workingSets = strengthState.completedSets.filter(s => !s.warmup);
+  const volume = workingSets.reduce((sum,s) => sum + (s.weight || 0) * (s.reps || 0), 0);
+  workoutLog.unshift({ version:2, type:'strength', date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}), wod:selectedWOD.id, wodName:selectedWOD.name, wodTag:selectedWOD.tag, focus:selectedWOD.focus, color:selectedWOD.color, duration, exercises, sets:workingSets.length, volume });
+  localStorage.setItem('recompLog', JSON.stringify(workoutLog));
+  strengthState = null;
+  localStorage.removeItem(STRENGTH_DRAFT_KEY);
+  document.getElementById('strengthRestCard').classList.remove('show');
+  renderLog(); updateStreakBadge(); victoryFanfare(); launchConfetti(); showView('log');
+  setTimeout(stopConfetti, 3500);
+}
+
+function exitStrengthSession(force = false) {
+  if (!force && strengthState?.completedSets.length && !window.confirm('Leave this strength session? Your completed sets are saved as a draft.')) return;
+  clearInterval(strengthClockInterval); clearInterval(strengthRestInterval);
+  strengthState = null;
+  document.getElementById('strengthRestCard').classList.remove('show');
+  showView('select');
+}
+
+function saveStrengthDraft() {
+  if (!strengthState || !selectedWOD) return;
+  localStorage.setItem(STRENGTH_DRAFT_KEY, JSON.stringify({ workoutId:selectedWOD.id, state:strengthState }));
+}
+
+function restoreStrengthDraft() {
+  let draft;
+  try { draft = JSON.parse(localStorage.getItem(STRENGTH_DRAFT_KEY) || 'null'); } catch(e) { return; }
+  const workout = draft && ALL_SESSIONS.find(s => s.id === draft.workoutId && s.type === 'strength');
+  if (!workout || !draft.state?.completedSets?.length || !window.confirm(`Resume ${workout.name}?`)) return;
+  selectedWOD = workout;
+  strengthState = {...draft.state, substitutions:draft.state.substitutions || {}, restLeft:0, pendingAdvance:false};
+  document.getElementById('strengthTitle').textContent = selectedWOD.name;
+  document.getElementById('strengthTag').textContent = selectedWOD.tag;
+  showView('strength'); renderStrengthSession(); updateStrengthElapsed();
+  strengthClockInterval = setInterval(updateStrengthElapsed, 1000);
+}
+
 
 // ═══════════════════════════════
 // COMPLETE
@@ -3742,12 +4098,15 @@ function renderLog() {
         <div class="log-color-bar" style="background:${e.color}"></div>
         <div>
           <div class="log-wod-name">${e.wodTag} ${e.wodName}</div>
-          <div class="log-meta">${e.date} · ${e.rounds} ROUNDS</div>
+          <div class="log-meta">${e.date} · ${e.type === 'strength' && Array.isArray(e.exercises) ? `${e.sets || 0} SETS` : `${e.rounds} ROUNDS`}</div>
+          ${e.type === 'strength' && Array.isArray(e.exercises) ? `<div class="strength-log-detail">${formatStrengthLog(e, idx)}${e.volume ? `<br>VOLUME: ${e.volume.toLocaleString()} LB` : ''}</div>` : ''}
         </div>
         <div class="log-stats">
           <div class="log-stat-val">${e.duration}m</div>
           <div class="log-stat-label">DURATION</div>
           <button class="log-share-btn" onclick="shareSession(${idx}, this)">SHARE</button>
+          <button class="log-share-btn" onclick="editLogEntry(${idx})">EDIT</button>
+          <button class="log-share-btn" onclick="deleteLogEntry(${idx})">DELETE</button>
         </div>
       </div>`).join('');
   }
@@ -3761,8 +4120,47 @@ function renderLog() {
   document.getElementById('statTotal').textContent = total;
   document.getElementById('statTime').textContent = totalMin > 0 ? `${totalMin}m` : '0m';
   document.getElementById('statStreak').textContent = streak;
-  document.getElementById('statFave').textContent = fave ? `W${fave}` : '—';
+  document.getElementById('statFave').textContent = fave ? (String(fave).startsWith('strength_') ? 'STR' : `W${fave}`) : '—';
   renderHistoryChart();
+}
+
+function formatStrengthLog(entry, entryIndex) {
+  return entry.exercises.map(ex => {
+    const working = ex.sets.filter(s => !s.warmup);
+    const currentBest = Math.max(0, ...working.map(s => s.weight || 0));
+    const previousBest = Math.max(0, ...workoutLog.filter((_,i) => i > entryIndex).flatMap(e => e.exercises || []).filter(e => e.name === ex.name).flatMap(e => e.sets || []).filter(s => !s.warmup).map(s => s.weight || 0));
+    const pr = currentBest > previousBest && currentBest > 0 ? ' · 🏆 PR' : '';
+    return `${ex.name}: ${working.map(s => `${s.reps ?? '—'} @ ${s.weight ?? '—'}${s.weight != null ? s.unit : ''}`).join(', ')}${pr}`;
+  }).join('<br>');
+}
+
+function deleteLogEntry(index) {
+  if (!workoutLog[index] || !window.confirm('Delete this logged session?')) return;
+  workoutLog.splice(index, 1);
+  localStorage.setItem('recompLog', JSON.stringify(workoutLog));
+  renderLog(); updateStreakBadge();
+}
+
+function editLogEntry(index) {
+  const entry = workoutLog[index];
+  if (!entry) return;
+  const duration = window.prompt('Session duration in minutes:', entry.duration);
+  if (duration === null) return;
+  const parsedDuration = Number(duration);
+  if (Number.isFinite(parsedDuration) && parsedDuration >= 0) entry.duration = parsedDuration;
+  if (entry.type === 'strength' && Array.isArray(entry.exercises) && window.confirm('Edit strength set results too?')) {
+    entry.exercises.forEach(ex => ex.sets.forEach((set,i) => {
+      const label = set.warmup ? `warm-up ${i+1}` : `set ${i+1}`;
+      const result = window.prompt(`${ex.name} ${label} — enter weight,reps`, `${set.weight ?? ''},${set.reps ?? ''}`);
+      if (result === null) return;
+      const [weight,reps] = result.split(',').map(v => Number(v.trim()));
+      set.weight = Number.isFinite(weight) ? weight : null;
+      set.reps = Number.isFinite(reps) ? reps : null;
+    }));
+    entry.volume = entry.exercises.flatMap(ex => ex.sets).filter(s => !s.warmup).reduce((sum,s) => sum + (s.weight || 0) * (s.reps || 0), 0);
+  }
+  localStorage.setItem('recompLog', JSON.stringify(workoutLog));
+  renderLog();
 }
 
 function calcStreak() {
@@ -3846,7 +4244,9 @@ function openPreview() {
   // Estimate duration
   const mvCount = wod.movements.length;
   const rounds = settings.rounds;
-  const estMin = Math.round((mvCount * (settings.work + settings.rest) * rounds + (rounds - 1) * settings.roundRest) / 60);
+  const estMin = wod.type === 'strength'
+    ? Math.round(wod.movements.reduce((sum,m) => sum + m.sets * 50 + Math.max(0,m.sets - 1) * m.rest, 0) / 60)
+    : Math.round((mvCount * (settings.work + settings.rest) * rounds + (rounds - 1) * settings.roundRest) / 60);
 
   const card = document.getElementById('previewCard');
   card.innerHTML = `
@@ -3856,7 +4256,7 @@ function openPreview() {
 
     <div class="preview-meta">
       <div class="preview-meta-item">${mvCount} MOVEMENTS</div>
-      <div class="preview-meta-item">${rounds} ROUNDS</div>
+      <div class="preview-meta-item">${wod.type === 'strength' ? `${wod.movements.reduce((sum,m) => sum + m.sets, 0)} SETS` : `${rounds} ROUNDS`}</div>
       <div class="preview-meta-item">~${estMin} MIN</div>
       <div class="preview-meta-item">${labelMap[scale]}</div>
     </div>
@@ -3871,7 +4271,7 @@ function openPreview() {
             <div class="preview-mv-num">${i + 1}</div>
             <div class="preview-mv-info">
               <div class="preview-mv-name">${mv.name}</div>
-              <div class="preview-mv-detail">${mv.equip}${mv.reps ? ' · ' + mv.reps : ''}</div>
+              <div class="preview-mv-detail">${mv.equip}${wod.type === 'strength' ? ` · ${mv.sets} × ${mv.reps} · ${Math.floor(mv.rest/60)}:${String(mv.rest%60).padStart(2,'0')} REST` : (mv.reps ? ' · ' + mv.reps : '')}</div>
               ${weight ? `<div class="preview-mv-weight">${weight}</div>` : ''}
             </div>
             <div class="preview-mv-demo${hasImg ? '' : ' no-img'}" ${hasImg ? `onclick="openPreviewDemo('${wod.id}', ${i})"` : ''} title="${hasImg ? 'View demo' : 'No demo available'}">?</div>
@@ -3885,7 +4285,7 @@ function openPreview() {
 
     <div class="preview-btns">
       <button class="preview-btn secondary" onclick="closePreview()">BACK</button>
-      <button class="preview-btn primary" style="background:${wod.color}" onclick="closePreview(); goToTimer();">START</button>
+      <button class="preview-btn primary" style="background:${wod.color}" onclick="closePreview(); ${wod.type === 'strength' ? 'startStrengthSession()' : 'goToTimer()'};">START</button>
     </div>`;
 
   document.getElementById('previewOverlay').classList.add('show');
@@ -3955,6 +4355,13 @@ function applyTheme() {
 // NAV
 // ═══════════════════════════════
 function showView(name) {
+  if (strengthState && name !== 'strength') {
+    if (strengthState.completedSets.length && !window.confirm('Leave this strength session? Your completed sets are saved as a draft.')) return;
+    clearInterval(strengthClockInterval);
+    clearInterval(strengthRestInterval);
+    strengthState = null;
+    document.getElementById('strengthRestCard').classList.remove('show');
+  }
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById(`view-${name}`).classList.add('active');
@@ -3983,6 +4390,13 @@ function quickStart(id, e) {
 function buildShareText(entry) {
   const session = ALL_SESSIONS.find(s => String(s.id) === String(entry.wod));
   const movements = session ? session.movements.map((m, i) => `  ${i + 1}. ${m.name}`).join('\n') : '';
+
+  if (entry.type === 'strength' && Array.isArray(entry.exercises)) {
+    const details = (entry.exercises || []).map(ex =>
+      `${ex.name}: ${ex.sets.map(s => `${s.reps ?? '—'} reps @ ${s.weight ?? '—'}${s.weight != null ? s.unit : ''}`).join(' · ')}`
+    ).join('\n');
+    return [`🏋 RECOMP STRENGTH — ${entry.date}`, '', `${entry.wodTag} ${entry.wodName}`, entry.focus || '', '', details, '', `⏱ ${entry.sets || 0} sets · ${entry.duration} min`].join('\n');
+  }
 
   return [
     `💪 RECOMP WOD — ${entry.date}`,
@@ -4176,6 +4590,9 @@ const EXERCISE_IMAGES = {
   'KB American Swings': 'One-Arm_Kettlebell_Swings',
   'Dumbbell Goblet Lunges': 'Dumbbell_Lunges',
   'Dead Hang': 'Chin-Up',
+  'Barbell Bench Press': 'Barbell_Bench_Press_-_Medium_Grip',
+  'Pull-Ups': 'Pullups',
+  'Dumbbell Walking Lunges': 'Dumbbell_Lunges',
 };
 
 let demoInterval = null;
@@ -4228,11 +4645,12 @@ function closeExDemo(e) {
 // CUSTOM WOD BUILDER
 // ═══════════════════════════════
 let builderPicks = [];
+let builderType = 'wod';
 
 function buildMovementPool() {
   const pool = [];
   const seen = new Set();
-  [...WODS, ...WODS_EXTRA].forEach(wod => {
+  [...WODS, ...STRENGTH_WORKOUTS, ...WODS_EXTRA].forEach(wod => {
     wod.movements.forEach(mv => {
       if (!seen.has(mv.name)) {
         seen.add(mv.name);
@@ -4243,9 +4661,12 @@ function buildMovementPool() {
   return pool.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-function openBuilder() {
+function openBuilder(type = 'wod') {
+  builderType = type;
   builderPicks = [];
   document.getElementById('builderName').value = '';
+  document.getElementById('builderTitle').textContent = type === 'strength' ? 'BUILD YOUR STRENGTH WORKOUT' : 'BUILD YOUR WOD';
+  document.getElementById('builderSubtitle').textContent = type === 'strength' ? 'PICK UP TO 6 EXERCISES · DEFAULT 3 × 8–10' : 'PICK UP TO 6 MOVEMENTS';
   renderBuilderUI();
   document.getElementById('builderOverlay').classList.add('show');
 }
@@ -4295,16 +4716,16 @@ function saveCustomWOD() {
   const wod = {
     id,
     name: `"${name}"`,
-    tag: 'CUSTOM',
-    type: 'custom',
-    focus: `${builderPicks.length} movements — custom build`,
-    color: '#3affa0',
+    tag: builderType === 'strength' ? 'CUSTOM STRENGTH' : 'CUSTOM',
+    type: builderType === 'strength' ? 'strength' : 'custom',
+    focus: `${builderPicks.length} ${builderType === 'strength' ? 'exercises' : 'movements'} — custom build`,
+    color: builderType === 'strength' ? '#3adfff' : '#3affa0',
     day: 'ANY',
-    movements: builderPicks.map(mv => ({ ...mv }))
+    movements: builderPicks.map(mv => builderType === 'strength' ? ({ ...mv, sets:mv.sets || 3, reps:mv.reps || '8-10', rest:mv.rest || 120 }) : ({ ...mv }))
   };
 
   customWODs.push(wod);
-  ALL_SESSIONS = [...WODS, ...WODS_EXTRA, ...MOBILITY, ...customWODs];
+  ALL_SESSIONS = [...WODS, ...STRENGTH_WORKOUTS, ...WODS_EXTRA, ...MOBILITY, ...customWODs];
   localStorage.setItem('recompCustomWODs', JSON.stringify(customWODs));
 
   closeBuilder();
@@ -4314,7 +4735,7 @@ function saveCustomWOD() {
 function deleteCustomWOD(id, e) {
   e.stopPropagation();
   customWODs = customWODs.filter(w => w.id !== id);
-  ALL_SESSIONS = [...WODS, ...WODS_EXTRA, ...MOBILITY, ...customWODs];
+  ALL_SESSIONS = [...WODS, ...STRENGTH_WORKOUTS, ...WODS_EXTRA, ...MOBILITY, ...customWODs];
   localStorage.setItem('recompCustomWODs', JSON.stringify(customWODs));
   renderAllSessions();
 }
@@ -4467,7 +4888,7 @@ function selectGeneratedWOD(idx) {
 
   // Add to custom WODs and persist
   customWODs.push(wod);
-  ALL_SESSIONS = [...WODS, ...WODS_EXTRA, ...MOBILITY, ...customWODs];
+  ALL_SESSIONS = [...WODS, ...STRENGTH_WORKOUTS, ...WODS_EXTRA, ...MOBILITY, ...customWODs];
   localStorage.setItem('recompCustomWODs', JSON.stringify(customWODs));
 
   closeGenerator();

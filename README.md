@@ -2,6 +2,8 @@
 
 A personal workout app built around a 5-WOD recomposition program targeting hypertrophy, fat loss, and posterior chain development. Designed to be used alongside GLP-1 medication with a specific focus on thighs, glutes, and midsection.
 
+The app also includes four progressive strength sessions with per-set weight and rep tracking, automatic rest timers, and previous-session recall.
+
 Live at: **https://krisekenes.github.io/recomp-wod**
 
 ---
@@ -33,6 +35,11 @@ Live at: **https://krisekenes.github.io/recomp-wod**
 - **Two Workout Modes**
   - **Circuit** — cycle all 6 movements per round, repeat for X rounds
   - **Station** — complete all sets of one movement before moving to the next
+- **Strength Training** — four built-in programs, including a classic squat/bench/deadlift day, with set-by-set load/reps entry and exercise-specific rest timers
+- **Strength History** — detailed set results are persisted and the previous performance is recalled next session
+- **Strength Progression** — warm-up sets, previous-session guidance, volume totals, and personal-record markers
+- **Session Recovery** — active strength sessions are saved after every set and can resume after a refresh
+- **Custom Strength Workouts** — build set-based sessions from the shared exercise library
 - **Finisher Selection** — choose a 3-min finisher to queue before starting
 - **Session Log** — persisted to localStorage; tracks sessions, total time, streak, favourite WOD
 - **Streak Badge** — live streak count in the header

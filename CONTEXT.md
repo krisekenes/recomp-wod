@@ -81,7 +81,13 @@ Station mode is better for strength-focused sessions where you want full fatigue
 ### Persistence
 - `localStorage` only — no backend, no accounts
 - Key: `recompLog` → JSON array of `{ date, wod, wodName, wodTag, color, rounds, duration }`
+- Strength entries use the versioned shape `{ version: 2, type: 'strength', exercises: [{ name, sets: [{ weight, reps, unit }] }] }`; older WOD entries remain supported
 - Streak is computed at render time from the log, not stored separately
+
+### Strength Sessions
+Strength A–D use a separate set-driven workspace rather than the interval timer. Strength D is a classic squat, bench press, and deadlift day with conservative deadlift volume. Each exercise defines sets, a rep range, rest duration, technique cue, and scaling standards. Completing a set records actual weight/reps and launches the prescribed rest timer. The most recent matching workout prefills prior results.
+
+Barbell exercises receive two warm-up sets by default. Strength progress is autosaved under `recompStrengthDraft`; completed sessions calculate working-set volume and personal records. Users can build custom strength sessions, cycle through common equipment substitutions, and edit or delete log entries.
 
 ---
 
@@ -111,10 +117,9 @@ Station mode is better for strength-focused sessions where you want full fatigue
 ## Known Limitations / Future Work
 
 - [ ] No cloud sync — log is device-local only
-- [ ] No weight tracking per movement (future: log kg/lbs alongside reps)
+- [ ] Interval WODs do not track weight/reps; strength sessions do
 - [ ] No rest-day active recovery programming
-- [ ] Finisher timer is manual (user runs it mentally) — could be a dedicated 3-min countdown mode
-- [ ] No progressive overload tracking across sessions
+- [ ] Strength progression suggests the next load from the latest session, but there is no long-term exercise chart yet
 - [ ] Beat the Book only compares to Round 1 — could compare to personal best across sessions
 
 ---
